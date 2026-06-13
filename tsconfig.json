@@ -1,0 +1,57 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "types": ["node", "jest"],
+    "baseUrl": ".",
+    "paths": {
+      "@handlers/*": ["src/handlers/*"],
+      "@services/*": ["src/services/*"],
+      "@clients/*": ["src/clients/*"],
+      "@adapters/*": ["src/adapters/*"],
+      "@models/*": ["src/models/*"],
+      "@utils/*": ["src/utils/*"],
+      "@constants/*": ["src/constants/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "cdk/**/*",
+    "tests/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "cdk.out",
+    "**/*.test.ts",
+    "**/__tests__/**"
+  ]
+}

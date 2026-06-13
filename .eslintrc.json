@@ -1,0 +1,57 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint", "prettier"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "prettier"
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/explicit-function-return-type": ["error", {
+      "allowExpressions": true
+    }],
+    "@typescript-eslint/no-unused-vars": ["error", {
+      "argsIgnorePattern": "^_"
+    }],
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-misused-promises": "error",
+    "@typescript-eslint/await-thenable": "error",
+    "no-console": ["error", {
+      "allow": ["warn", "error"]
+    }],
+    "max-lines-per-function": ["error", {
+      "max": 50,
+      "skipBlankLines": true,
+      "skipComments": true
+    }],
+    "complexity": ["error", 10],
+    "max-depth": ["error", 3],
+    "max-nested-callbacks": ["error", 3],
+    "no-magic-numbers": ["off"],
+    "prefer-const": "error",
+    "no-var": "error",
+    "eqeqeq": ["error", "always"],
+    "curly": ["error", "all"],
+    "brace-style": ["error", "1tbs"]
+  },
+  "env": {
+    "node": true,
+    "jest": true,
+    "es2022": true
+  },
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    "cdk.out",
+    "coverage",
+    "*.js"
+  ]
+}
