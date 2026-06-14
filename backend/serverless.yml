@@ -7,11 +7,26 @@ provider:
   runtime: nodejs20.x
   region: ap-south-1
   stage: ${opt:stage, 'dev'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:BatchGetItem
+            - dynamodb:BatchWriteItem
+          Resource:
+            - arn:aws:dynamodb:ap-south-1:126697142700:table/Dev-*
   environment:
-    NODE_ENV: development
-    DYNAMODB_ENDPOINT: http://localhost:8000
+    NODE_ENV: production
+    # DYNAMODB_ENDPOINT is intentionally omitted for cloud deployment — SDK uses native AWS endpoint
     DYNAMODB_TABLE_PREFIX: Dev-
-    AWS_REGION: ap-south-1
+    # AWS_REGION is reserved by Lambda — it is injected automatically
     LOG_LEVEL: info
     ENABLE_OPENSEARCH: 'false'
     ENABLE_REDIS: 'false'
@@ -19,7 +34,7 @@ provider:
     ENABLE_BEDROCK: 'false'
     ENABLE_REKOGNITION: 'false'
     ENABLE_TRANSCRIBE: 'false'
-    SKIP_AUTH_IN_DEV: 'true'
+    SKIP_AUTH_IN_DEV: 'false'
 
 plugins:
   - serverless-offline
@@ -34,12 +49,16 @@ custom:
 package:
   individually: false
   patterns:
-    - '!node_modules/**'
     - '!tests/**'
     - '!cdk/**'
     - '!scripts/**'
     - '!.env*'
+    - '!src/**'
+    - '!coverage/**'
+    - '!*.ts'
+    - '!tsconfig*.json'
     - '.build/**'
+    - 'node_modules/**'
 
 functions:
   # ── Products ──────────────────────────────────────────────────────────────

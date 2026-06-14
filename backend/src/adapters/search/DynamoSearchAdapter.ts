@@ -25,7 +25,6 @@ import {
   DynamoDBDocumentClient,
   ScanCommand,
   QueryCommand,
-  GetCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { SearchAdapter, SearchResult } from '../interfaces';
 import { logger } from '@utils/logger';
@@ -253,15 +252,12 @@ export class DynamoSearchAdapter implements SearchAdapter {
         searchMode: 'dynamo',
       });
 
-      // For Hackathon Mode: Return first N available products
+      // For Hackathon Mode: Return first N products (no isAvailable filter —
+      // seed data does not include that attribute; all seeded items are available)
       // In production, this would aggregate SnapOrders by pincode + product
       const command = new ScanCommand({
         TableName: this.searchIndexTable,
-        FilterExpression: 'isAvailable = :true',
-        ExpressionAttributeValues: {
-          ':true': true,
-        },
-        Limit: limit,
+        Limit: limit * 3, // Over-fetch to compensate for DynamoDB Limit applying before filter
       });
 
       const response = await this.client.send(command);
@@ -314,12 +310,16 @@ export class DynamoSearchAdapter implements SearchAdapter {
     }
 
     try {
-      // Fetch products in parallel
+      // SnapProducts has a composite key (productId + sku), so GetCommand won't work
+      // with productId alone. Use Query on the partition key instead — it returns all
+      // SKUs for a product; we take the first one.
       const promises = productIds.map((productId) =>
         this.client.send(
-          new GetCommand({
+          new QueryCommand({
             TableName: this.productsTable,
-            Key: { productId },
+            KeyConditionExpression: 'productId = :pid',
+            ExpressionAttributeValues: { ':pid': productId },
+            Limit: 1,
           })
         )
       );
@@ -327,8 +327,9 @@ export class DynamoSearchAdapter implements SearchAdapter {
       const responses = await Promise.all(promises);
 
       for (const response of responses) {
-        if (response.Item) {
-          productMap.set(response.Item.productId as string, response.Item);
+        const item = response.Items?.[0];
+        if (item) {
+          productMap.set(item.productId as string, item);
         }
       }
     } catch (error) {
