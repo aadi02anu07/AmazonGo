@@ -147,6 +147,19 @@ ios/build/
 android/build/
 android/.gradle/
 android/app/build/
+mobile/build/
+mobile/.gradle/
+mobile/app/build/
+mobile/.idea/
+mobile/local.properties
+
+# Frontend (Next.js / web)
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
 
 # Certificates and keys (double protection)
 *.p12
@@ -194,6 +207,9 @@ cdk-bootstrap-*
 .serverless/
 serverless.yml.backup
 
+# Serverless compiled TypeScript output
+.build/
+
 # Jest
 .jest/
 
@@ -216,3 +232,4 @@ docs/.vitepress/cache/
 
 #.md Files
 files/
+postman/

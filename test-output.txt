@@ -1,0 +1,51 @@
+  console.error
+    {"timestamp":"2026-06-14T07:16:00.837Z","level":"ERROR","service":"snap-service","message":"Cache get error","error":{}}
+
+    [0m [90m 121 |[39m   [36mpublic[39m error(context[33m:[39m [33mLogContext[39m)[33m:[39m [36mvoid[39m {
+     [90m 122 |[39m     [36mif[39m ([36mthis[39m[33m.[39mshouldLog([33mLogLevel[39m[33m.[39m[33mERROR[39m)) {
+    [31m[1m>[22m[39m[90m 123 |[39m       console[33m.[39merror([36mthis[39m[33m.[39mformatLog([33mLogLevel[39m[33m.[39m[33mERROR[39m[33m,[39m context))[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 124 |[39m     }
+     [90m 125 |[39m   }
+     [90m 126 |[39m }[0m
+
+      at Logger.error (src/utils/logger.ts:123:15)
+      at withCache (src/services/ProductService.ts:79:12)
+
+  console.error
+    {"timestamp":"2026-06-14T07:16:00.873Z","level":"ERROR","service":"snap-service","message":"Cache set error","error":{}}
+
+    [0m [90m 121 |[39m   [36mpublic[39m error(context[33m:[39m [33mLogContext[39m)[33m:[39m [36mvoid[39m {
+     [90m 122 |[39m     [36mif[39m ([36mthis[39m[33m.[39mshouldLog([33mLogLevel[39m[33m.[39m[33mERROR[39m)) {
+    [31m[1m>[22m[39m[90m 123 |[39m       console[33m.[39merror([36mthis[39m[33m.[39mformatLog([33mLogLevel[39m[33m.[39m[33mERROR[39m[33m,[39m context))[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 124 |[39m     }
+     [90m 125 |[39m   }
+     [90m 126 |[39m }[0m
+
+      at Logger.error (src/utils/logger.ts:123:15)
+      at withCache (src/services/ProductService.ts:91:12)
+      at Object.<anonymous> (tests/unit/services/ProductService.test.ts:227:20)
+
+PASS tests/unit/services/ProductService.test.ts (9.779 s)
+  getProductById
+    √ Req 13.1 — found: returns the product when getItem resolves with a product (5 ms)
+    √ Req 13.2 — not found: throws AppError PRODUCT_NOT_FOUND (404) when getItem returns null (1 ms)
+  searchProducts
+    √ Req 13.3 — delegates unchanged: returns exactly what searchAdapter.search returns (1 ms)
+  getTrendingProducts
+    √ Req 13.4 — cache hit: returns cached value without calling searchAdapter.getTrending (2 ms)
+    √ Req 13.5 — cache miss: calls getTrending, sets cache with 900s TTL, returns result (1 ms)
+    √ Req 13.9 — cache.get throws: error is swallowed, getTrending is still called and result returned (34 ms)
+  getProductByBarcode
+    √ Req 13.6 — cache hit: returns cached product without calling queryItems
+    √ Req 13.7 — cache miss, found: queries DynamoDB, sets cache with 3600s TTL, returns product
+    √ Req 13.8 — cache miss, not found: throws AppError PRODUCT_NOT_FOUND when queryItems returns empty array (1 ms)
+    √ Req 13.10 — cache.set throws: error is swallowed, product is still returned normally (6 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       10 passed, 10 total
+Snapshots:   0 total
+Time:        10.284 s, estimated 13 s
+Ran all test suites matching /;|type|test-output.txt|ProductService/i.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

@@ -1,0 +1,168 @@
+service: amazon-now-snap
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-south-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    NODE_ENV: development
+    DYNAMODB_ENDPOINT: http://localhost:8000
+    DYNAMODB_TABLE_PREFIX: Dev-
+    AWS_REGION: ap-south-1
+    LOG_LEVEL: info
+    ENABLE_OPENSEARCH: 'false'
+    ENABLE_REDIS: 'false'
+    ENABLE_PERSONALIZE: 'false'
+    ENABLE_BEDROCK: 'false'
+    ENABLE_REKOGNITION: 'false'
+    ENABLE_TRANSCRIBE: 'false'
+    SKIP_AUTH_IN_DEV: 'true'
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3000
+    host: localhost
+    noPrependStageInUrl: true
+    noAuth: true
+
+package:
+  individually: false
+  patterns:
+    - '!node_modules/**'
+    - '!tests/**'
+    - '!cdk/**'
+    - '!scripts/**'
+    - '!.env*'
+    - '.build/**'
+
+functions:
+  # ── Products ──────────────────────────────────────────────────────────────
+  getProduct:
+    handler: .build/src/handlers/products.getProduct
+    events:
+      - httpApi:
+          path: /v1/products/{productId}
+          method: GET
+
+  searchProducts:
+    handler: .build/src/handlers/products.searchProductsHandler
+    events:
+      - httpApi:
+          path: /v1/products/search
+          method: GET
+
+  getTrending:
+    handler: .build/src/handlers/products.getTrendingHandler
+    events:
+      - httpApi:
+          path: /v1/products/trending
+          method: GET
+
+  getBarcode:
+    handler: .build/src/handlers/products.getBarcodeHandler
+    events:
+      - httpApi:
+          path: /v1/products/barcode/{code}
+          method: GET
+
+  # ── Inventory ─────────────────────────────────────────────────────────────
+  checkStock:
+    handler: .build/src/handlers/inventory.checkStockHandler
+    events:
+      - httpApi:
+          path: /v1/inventory/{pincode}/{productId}
+          method: GET
+
+  batchCheck:
+    handler: .build/src/handlers/inventory.batchCheckHandler
+    events:
+      - httpApi:
+          path: /v1/inventory/batch-check
+          method: POST
+
+  # ── ETA ───────────────────────────────────────────────────────────────────
+  calculateETA:
+    handler: .build/src/handlers/eta.calculateETAHandler
+    events:
+      - httpApi:
+          path: /v1/eta
+          method: GET
+
+  batchETA:
+    handler: .build/src/handlers/eta.batchETAHandler
+    events:
+      - httpApi:
+          path: /v1/eta/batch
+          method: POST
+
+  # ── Intent ────────────────────────────────────────────────────────────────
+  resolveTextIntent:
+    handler: .build/src/handlers/intent.resolveTextIntentHandler
+    events:
+      - httpApi:
+          path: /v1/intent/text
+          method: POST
+
+  resolveVoiceIntent:
+    handler: .build/src/handlers/intent.resolveVoiceIntentHandler
+    events:
+      - httpApi:
+          path: /v1/intent/voice
+          method: POST
+
+  # ── Smart Cart ────────────────────────────────────────────────────────────
+  getSmartCart:
+    handler: .build/src/handlers/smartCart.getSmartCartHandler
+    events:
+      - httpApi:
+          path: /v1/smart-cart
+          method: GET
+
+  refreshSmartCart:
+    handler: .build/src/handlers/smartCart.refreshSmartCartHandler
+    events:
+      - httpApi:
+          path: /v1/smart-cart/refresh
+          method: POST
+
+  # ── Orders ────────────────────────────────────────────────────────────────
+  placeOrder:
+    handler: .build/src/handlers/orders.placeOrderHandler
+    events:
+      - httpApi:
+          path: /v1/orders
+          method: POST
+
+  getOrderHistory:
+    handler: .build/src/handlers/orders.getOrderHistoryHandler
+    events:
+      - httpApi:
+          path: /v1/orders
+          method: GET
+
+  getRecentOrders:
+    handler: .build/src/handlers/orders.getRecentOrdersHandler
+    events:
+      - httpApi:
+          path: /v1/orders/recent
+          method: GET
+
+  getOrder:
+    handler: .build/src/handlers/orders.getOrderHandler
+    events:
+      - httpApi:
+          path: /v1/orders/{orderId}
+          method: GET
+
+  reorder:
+    handler: .build/src/handlers/orders.reorderHandler
+    events:
+      - httpApi:
+          path: /v1/orders/{orderId}/reorder
+          method: POST

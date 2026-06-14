@@ -139,7 +139,7 @@ export class KeywordIntentAdapter implements IntentResolutionAdapter {
 
       // Tags matching (weight: 2)
       maxScore += 2;
-      if (productTags.some((tag) => tag.includes(token))) {
+      if (productTags.some((tag: string) => tag.includes(token))) {
         score += 2;
       }
 

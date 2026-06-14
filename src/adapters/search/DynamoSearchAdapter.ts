@@ -117,7 +117,7 @@ export class DynamoSearchAdapter implements SearchAdapter {
    */
   async search(
     query: string,
-    pincode: string,
+    _pincode: string,
     category?: string,
     limit: number = 20
   ): Promise<SearchResult[]> {

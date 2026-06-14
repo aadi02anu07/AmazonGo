@@ -121,7 +121,7 @@ This phase implements 64 implementation tasks across 7 phases, delivering 6 core
 
 ### 0.1 Setup Testing Framework and Error Utilities
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: None
 - **Tags**: setup, infrastructure, utilities
 - **Estimated Hours**: 4
@@ -138,13 +138,13 @@ Set up Jest testing framework, create error handling utilities, define error cod
 - 0.1.6 Verify setup with smoke test
 
 **Acceptance Criteria**:
-- [ ] Jest configuration is complete and runs without errors
-- [ ] All error codes from requirements are defined in constants/errors.ts
-- [ ] AppError class can be thrown with code, message, and statusCode
-- [ ] Test fixtures provide builders for Product, Inventory, Order, User models
-- [ ] Response utility generates correct envelope format (success/error)
-- [ ] Mock adapters (SearchAdapter, IntentAdapter, RecommendationAdapter) are implemented
-- [ ] Smoke test passes (can create and throw AppError, generate responses)
+- [x] Jest configuration is complete and runs without errors
+- [x] All error codes from requirements are defined in constants/errors.ts
+- [x] AppError class can be thrown with code, message, and statusCode
+- [x] Test fixtures provide builders for Product, Inventory, Order, User models
+- [x] Response utility generates correct envelope format (success/error)
+- [x] Mock adapters (SearchAdapter, IntentAdapter, RecommendationAdapter) are implemented
+- [x] Smoke test passes (can create and throw AppError, generate responses)
 
 ---
 
@@ -154,7 +154,7 @@ The Products Service provides product catalog management with multiple lookup me
 
 ### 1.1 Create Product Model and Types
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: model, types, products
 - **Estimated Hours**: 2
@@ -169,16 +169,16 @@ Define TypeScript interfaces and types for Product, SearchResult, and related mo
 - 1.1.4 Create type exports
 
 **Acceptance Criteria**:
-- [ ] Product interface has all required fields (productId, sku, name, brand, category, description, imageUrls, price in paise, etc.)
-- [ ] Validation schemas validate pincode (6 digits), productId (UUID), search query (max 200 chars, non-empty)
-- [ ] Types can be imported and used across the application
-- [ ] Zod schemas reject invalid inputs (wrong format, length violations)
+- [x] Product interface has all required fields (productId, sku, name, brand, category, description, imageUrls, price in paise, etc.)
+- [x] Validation schemas validate pincode (6 digits), productId (UUID), search query (max 200 chars, non-empty)
+- [x] Types can be imported and used across the application
+- [x] Zod schemas reject invalid inputs (wrong format, length violations)
 
 ---
 
 ### 1.2 Create ProductsService Implementation
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 1.1, 0.1
 - **Tags**: service, products, business-logic
 - **Estimated Hours**: 6
@@ -195,20 +195,20 @@ Implement ProductsService with methods for getting products by ID, barcode, sear
 - 1.2.6 Add error handling for all methods
 
 **Acceptance Criteria**:
-- [ ] getProductById returns Product or throws PRODUCT_NOT_FOUND (404)
-- [ ] getProductByBarcode returns Product or throws BARCODE_NOT_FOUND (404)
-- [ ] getTrendingProducts returns array of Products or empty array
-- [ ] searchProducts returns array of SearchResults ranked by relevance
-- [ ] Cache is populated after successful retrieval with correct TTLs
-- [ ] Cache is checked before database query (fast path)
-- [ ] All methods have proper error handling and logging
-- [ ] barcode and product lookups work with correct cache keys
+- [x] getProductById returns Product or throws PRODUCT_NOT_FOUND (404)
+- [x] getProductByBarcode returns Product or throws BARCODE_NOT_FOUND (404)
+- [x] getTrendingProducts returns array of Products or empty array
+- [x] searchProducts returns array of SearchResults ranked by relevance
+- [x] Cache is populated after successful retrieval with correct TTLs
+- [x] Cache is checked before database query (fast path)
+- [x] All methods have proper error handling and logging
+- [x] barcode and product lookups work with correct cache keys
 
 ---
 
 ### 1.3 Create Products API Handler (Lambda)
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 1.2
 - **Tags**: handler, api, products
 - **Estimated Hours**: 4
@@ -225,19 +225,19 @@ Create Lambda handler for Products routes. Handles request parsing, validation, 
 - 1.3.6 Add response envelope formatting
 
 **Acceptance Criteria**:
-- [ ] GET /v1/products/{id} returns 200 with product or 404 with PRODUCT_NOT_FOUND
-- [ ] GET /v1/products/barcode/{code} returns 200 with product or 404 with BARCODE_NOT_FOUND
-- [ ] GET /v1/products/trending requires valid 6-digit pincode, returns 200 or 400 for invalid pincode
-- [ ] GET /v1/products/search requires non-empty query (max 200 chars) and valid pincode
-- [ ] All responses include requestId and timestamp
-- [ ] Invalid inputs return 400 with INVALID_REQUEST error
-- [ ] All routes check JWT token validity (return 401 if missing/expired)
+- [x] GET /v1/products/{id} returns 200 with product or 404 with PRODUCT_NOT_FOUND
+- [x] GET /v1/products/barcode/{code} returns 200 with product or 404 with BARCODE_NOT_FOUND
+- [x] GET /v1/products/trending requires valid 6-digit pincode, returns 200 or 400 for invalid pincode
+- [x] GET /v1/products/search requires non-empty query (max 200 chars) and valid pincode
+- [x] All responses include requestId and timestamp
+- [x] Invalid inputs return 400 with INVALID_REQUEST error
+- [x] All routes check JWT token validity (return 401 if missing/expired)
 
 ---
 
 ### 1.4 Write Products Service Unit Tests
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 1.2
 - **Tags**: test, unit, products
 - **Estimated Hours**: 4
@@ -254,17 +254,17 @@ Write unit tests for ProductsService with mocked cache and search adapters.
 - 1.4.6 Test error handling for all methods
 
 **Acceptance Criteria**:
-- [ ] All test cases pass
-- [ ] Mocked dependencies correctly substituted (cache, SearchAdapter)
-- [ ] Cache logic verified (TTL set correctly, key format correct)
-- [ ] Error cases throw AppError with correct code and status
-- [ ] Unit test coverage > 90% for ProductsService
+- [x] All test cases pass
+- [x] Mocked dependencies correctly substituted (cache, SearchAdapter)
+- [x] Cache logic verified (TTL set correctly, key format correct)
+- [x] Error cases throw AppError with correct code and status
+- [x] Unit test coverage > 90% for ProductsService
 
 ---
 
 ### 1.5 Write Products API Integration Tests
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 1.3, 1.4
 - **Tags**: test, integration, products
 - **Estimated Hours**: 4
@@ -282,13 +282,13 @@ Write integration tests for Products routes with DynamoDB Local and real adapter
 - 1.5.7 Test error scenarios and response format
 
 **Acceptance Criteria**:
-- [ ] All routes return correct HTTP status codes
-- [ ] All responses follow standard envelope format
-- [ ] DynamoDB Local integration works correctly
-- [ ] Test data is seeded and available for queries
-- [ ] Invalid parameters return 400 with detailed error info
-- [ ] Missing JWT returns 401
-- [ ] All tests pass
+- [x] All routes return correct HTTP status codes
+- [x] All responses follow standard envelope format
+- [x] DynamoDB Local integration works correctly
+- [x] Test data is seeded and available for queries
+- [x] Invalid parameters return 400 with detailed error info
+- [x] Missing JWT returns 401
+- [x] All tests pass
 
 ---
 
@@ -298,7 +298,7 @@ The Inventory Service manages stock levels with soft-reserve capability for chec
 
 ### 2.1 Create Inventory Model and Types
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: model, types, inventory
 - **Estimated Hours**: 2
@@ -314,16 +314,16 @@ Define TypeScript interfaces for InventoryRecord, InventoryStatus, and related m
 - 2.1.5 Create type exports
 
 **Acceptance Criteria**:
-- [ ] InventoryRecord has fields: pincodeProductId, pincode, productId, darkStoreId, stockLevel, isAvailableFor10Min, reservedUnits, reservationExpiresAt
-- [ ] InventoryStatus has fields: productId, pincode, isAvailableFor10Min, stockLevel, darkStoreId
-- [ ] Validation schemas validate pincode, productId, quantity (1-99)
-- [ ] Types compile and export correctly
+- [x] InventoryRecord has fields: pincodeProductId, pincode, productId, darkStoreId, stockLevel, isAvailableFor10Min, reservedUnits, reservationExpiresAt
+- [x] InventoryStatus has fields: productId, pincode, isAvailableFor10Min, stockLevel, darkStoreId
+- [x] Validation schemas validate pincode, productId, quantity (1-99)
+- [x] Types compile and export correctly
 
 ---
 
 ### 2.2 Create InventoryService Implementation
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 2.1, 0.1
 - **Tags**: service, inventory, business-logic
 - **Estimated Hours**: 8
@@ -341,21 +341,21 @@ Implement InventoryService with stock checking, batch checking, and soft-reserve
 - 2.2.7 Add comprehensive error handling
 
 **Acceptance Criteria**:
-- [ ] checkStock returns InventoryStatus or throws OUT_OF_STOCK/STOCK_CHECK_FAILED
-- [ ] batchCheckStock returns array of InventoryStatus objects
-- [ ] softReserve uses DynamoDB conditional write: `stockLevel > reservedUnits`
-- [ ] softReserve throws RESERVATION_FAILED on conditional write failure
-- [ ] Reservations expire after 90 seconds (TTL or scheduled cleanup)
-- [ ] releaseReservation decrements reservedUnits
-- [ ] Cache is checked before DynamoDB (cache hit returns within 30s TTL)
-- [ ] Invalid quantity (< 1 or > 99) throws INVALID_QUANTITY (400)
-- [ ] DynamoDB unavailability returns STOCK_CHECK_FAILED (500)
+- [x] checkStock returns InventoryStatus or throws OUT_OF_STOCK/STOCK_CHECK_FAILED
+- [x] batchCheckStock returns array of InventoryStatus objects
+- [x] softReserve uses DynamoDB conditional write: `stockLevel > reservedUnits`
+- [x] softReserve throws RESERVATION_FAILED on conditional write failure
+- [x] Reservations expire after 90 seconds (TTL or scheduled cleanup)
+- [x] releaseReservation decrements reservedUnits
+- [x] Cache is checked before DynamoDB (cache hit returns within 30s TTL)
+- [x] Invalid quantity (< 1 or > 99) throws INVALID_QUANTITY (400)
+- [x] DynamoDB unavailability returns STOCK_CHECK_FAILED (500)
 
 ---
 
 ### 2.3 Create Inventory API Handler (Lambda)
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 2.2
 - **Tags**: handler, api, inventory
 - **Estimated Hours**: 3
@@ -370,18 +370,18 @@ Create Lambda handler for Inventory routes.
 - 2.3.4 Add response envelope formatting
 
 **Acceptance Criteria**:
-- [ ] GET /v1/inventory/{pincode}/{productId} returns 200 with InventoryStatus or 422 with OUT_OF_STOCK
-- [ ] POST /v1/inventory/batch-check returns 200 with array of InventoryStatus
-- [ ] Invalid pincode returns 400 with INVALID_PINCODE
-- [ ] Invalid productId returns 400 with INVALID_REQUEST
-- [ ] All responses include requestId and timestamp
-- [ ] JWT validation passes (401 if missing/invalid)
+- [x] GET /v1/inventory/{pincode}/{productId} returns 200 with InventoryStatus or 422 with OUT_OF_STOCK
+- [x] POST /v1/inventory/batch-check returns 200 with array of InventoryStatus
+- [x] Invalid pincode returns 400 with INVALID_PINCODE
+- [x] Invalid productId returns 400 with INVALID_REQUEST
+- [x] All responses include requestId and timestamp
+- [x] JWT validation passes (401 if missing/invalid)
 
 ---
 
 ### 2.4 Write Inventory Service Unit Tests
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 2.2
 - **Tags**: test, unit, inventory
 - **Estimated Hours**: 5
@@ -398,17 +398,17 @@ Write unit tests for InventoryService with mocked DynamoDB and cache.
 - 2.4.6 Test error handling and edge cases
 
 **Acceptance Criteria**:
-- [ ] All test cases pass
-- [ ] softReserve conditional write logic verified (prevents overselling)
-- [ ] Cache behavior correct (30-second TTL)
-- [ ] Error scenarios throw correct codes and status
-- [ ] Unit test coverage > 90% for InventoryService
+- [x] All test cases pass
+- [x] softReserve conditional write logic verified (prevents overselling)
+- [x] Cache behavior correct (30-second TTL)
+- [x] Error scenarios throw correct codes and status
+- [x] Unit test coverage > 90% for InventoryService
 
 ---
 
 ### 2.5 Write Inventory API Integration Tests
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 2.3, 2.4
 - **Tags**: test, integration, inventory
 - **Estimated Hours**: 4
@@ -425,10 +425,10 @@ Write integration tests for Inventory routes with DynamoDB Local.
 - 2.5.6 Test error scenarios
 
 **Acceptance Criteria**:
-- [ ] All routes return correct HTTP status codes
-- [ ] Soft-reserve conditional write works (only one concurrent request succeeds)
-- [ ] Cache integration works (repeated requests within 30s return faster)
-- [ ] All tests pass with DynamoDB Local
+- [x] All routes return correct HTTP status codes
+- [x] Soft-reserve conditional write works (only one concurrent request succeeds)
+- [x] Cache integration works (repeated requests within 30s return faster)
+- [x] All tests pass with DynamoDB Local
 
 ---
 
@@ -438,7 +438,7 @@ The ETA Service calculates delivery time estimates based on dark store configura
 
 ### 3.1 Create ETA Model and Types
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: model, types, eta
 - **Estimated Hours**: 2
@@ -453,15 +453,15 @@ Define TypeScript interfaces for ETAResult, DarkStore, and related models.
 - 3.1.4 Create type exports
 
 **Acceptance Criteria**:
-- [ ] ETAResult has fields: etaMinutes, etaAt (ISO 8601), darkStoreId, label
-- [ ] DarkStore has fields: darkStoreId, name, city, latitude, longitude, serviceablePincodes, avgPickupMinutes, isOperational, operatingHours
-- [ ] Validation schemas work correctly
+- [x] ETAResult has fields: etaMinutes, etaAt (ISO 8601), darkStoreId, label
+- [x] DarkStore has fields: darkStoreId, name, city, latitude, longitude, serviceablePincodes, avgPickupMinutes, isOperational, operatingHours
+- [x] Validation schemas work correctly
 
 ---
 
 ### 3.2 Create ETAService Implementation
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 3.1, 0.1, 2.2
 - **Tags**: service, eta, business-logic
 - **Estimated Hours**: 6
@@ -478,19 +478,19 @@ Implement ETAService with ETA calculation logic based on dark store configuratio
 - 3.2.6 Add error handling for non-serviceable pincodes, offline stores
 
 **Acceptance Criteria**:
-- [ ] calculateETA returns ETAResult with etaMinutes and etaAt (ISO 8601)
-- [ ] Non-serviceable pincode throws PINCODE_NOT_SERVICEABLE (422)
-- [ ] Offline dark store throws DARKSTORE_OFFLINE (503)
-- [ ] Multiple dark stores: select one with shortest avgPickupMinutes
-- [ ] Cache is used (60-second TTL)
-- [ ] batchCalculateETA returns array of ETAResults
-- [ ] Missing dark store config throws ETA_CALCULATION_FAILED (500)
+- [x] calculateETA returns ETAResult with etaMinutes and etaAt (ISO 8601)
+- [x] Non-serviceable pincode throws PINCODE_NOT_SERVICEABLE (422)
+- [x] Offline dark store throws DARKSTORE_OFFLINE (503)
+- [x] Multiple dark stores: select one with shortest avgPickupMinutes
+- [x] Cache is used (60-second TTL)
+- [x] batchCalculateETA returns array of ETAResults
+- [x] Missing dark store config throws ETA_CALCULATION_FAILED (500)
 
 ---
 
 ### 3.3 Create ETA API Handler (Lambda)
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 3.2
 - **Tags**: handler, api, eta
 - **Estimated Hours**: 2
@@ -505,16 +505,16 @@ Create Lambda handler for ETA routes.
 - 3.3.4 Add response envelope formatting
 
 **Acceptance Criteria**:
-- [ ] GET /v1/eta returns 200 with ETAResult or 422/503 for error cases
-- [ ] POST /v1/eta/batch returns 200 with array of ETAResults
-- [ ] All responses include requestId and timestamp
-- [ ] JWT validation passes
+- [x] GET /v1/eta returns 200 with ETAResult or 422/503 for error cases
+- [x] POST /v1/eta/batch returns 200 with array of ETAResults
+- [x] All responses include requestId and timestamp
+- [x] JWT validation passes
 
 ---
 
 ### 3.4 Write ETA Service Unit Tests
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 3.2
 - **Tags**: test, unit, eta
 - **Estimated Hours**: 3
@@ -529,15 +529,15 @@ Write unit tests for ETAService.
 - 3.4.4 Test dark store selection (multiple stores serving pincode)
 
 **Acceptance Criteria**:
-- [ ] All test cases pass
-- [ ] Error scenarios throw correct codes
-- [ ] Unit test coverage > 90%
+- [x] All test cases pass
+- [x] Error scenarios throw correct codes
+- [x] Unit test coverage > 90%
 
 ---
 
 ### 3.5 Write ETA API Integration Tests
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 3.3, 3.4
 - **Tags**: test, integration, eta
 - **Estimated Hours**: 3
@@ -552,9 +552,9 @@ Write integration tests for ETA routes.
 - 3.5.4 Test error scenarios
 
 **Acceptance Criteria**:
-- [ ] All routes work end-to-end
-- [ ] Cache integration verified
-- [ ] All tests pass
+- [x] All routes work end-to-end
+- [x] Cache integration verified
+- [x] All tests pass
 
 ---
 
@@ -564,7 +564,7 @@ The Intent Service resolves user intent from text or voice input to product reco
 
 ### 4.1 Create Intent Model and Types
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: model, types, intent
 - **Estimated Hours**: 2
@@ -579,15 +579,15 @@ Define TypeScript interfaces for IntentResult, IntentRequest, and related models
 - 4.1.4 Create type exports
 
 **Acceptance Criteria**:
-- [ ] IntentResult has fields: productId, name, brand, price (paise), imageUrl, confidence (0-1), reason, resolvedBy, alternatives[], suggestedInput
-- [ ] Validation schemas validate transcript (non-empty, max length)
-- [ ] Types compile correctly
+- [x] IntentResult has fields: productId, name, brand, price (paise), imageUrl, confidence (0-1), reason, resolvedBy, alternatives[], suggestedInput
+- [x] Validation schemas validate transcript (non-empty, max length)
+- [x] Types compile correctly
 
 ---
 
 ### 4.2 Create IntentService Implementation
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 4.1, 0.1, 1.2
 - **Tags**: service, intent, business-logic
 - **Estimated Hours**: 8
@@ -608,20 +608,20 @@ Implement IntentService with confidence-based product resolution using IntentAda
 - 4.2.7 Add error handling
 
 **Acceptance Criteria**:
-- [ ] resolveTextIntent returns IntentResult or throws EMPTY_TRANSCRIPT (400)
-- [ ] resolveVoiceIntent returns IntentResult or throws EMPTY_TRANSCRIPT (400)
-- [ ] Confidence ≥ 0.75 returns single product with no alternatives
-- [ ] Confidence 0.50-0.74 returns product + alternatives array (max 2)
-- [ ] Confidence < 0.50 returns resolvedBy: 'none' with suggestedInput
-- [ ] IntentResult includes reason explanation
-- [ ] Error handling: INTENT_RESOLUTION_FAILED (500) on adapter error
-- [ ] All test cases validate confidence scoring logic
+- [x] resolveTextIntent returns IntentResult or throws EMPTY_TRANSCRIPT (400)
+- [x] resolveVoiceIntent returns IntentResult or throws EMPTY_TRANSCRIPT (400)
+- [x] Confidence ≥ 0.75 returns single product with no alternatives
+- [x] Confidence 0.50-0.74 returns product + alternatives array (max 2)
+- [x] Confidence < 0.50 returns resolvedBy: 'none' with suggestedInput
+- [x] IntentResult includes reason explanation
+- [x] Error handling: INTENT_RESOLUTION_FAILED (500) on adapter error
+- [x] All test cases validate confidence scoring logic
 
 ---
 
 ### 4.3 Create Intent API Handler (Lambda)
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 4.2
 - **Tags**: handler, api, intent
 - **Estimated Hours**: 2
@@ -636,16 +636,16 @@ Create Lambda handler for Intent routes.
 - 4.3.4 Add response envelope formatting
 
 **Acceptance Criteria**:
-- [ ] POST /v1/intent/text returns 200 with IntentResult or 400 for empty transcript
-- [ ] POST /v1/intent/voice returns 200 with IntentResult or 400 for empty transcript
-- [ ] All responses include requestId and timestamp
-- [ ] JWT validation passes (401 if missing/invalid)
+- [x] POST /v1/intent/text returns 200 with IntentResult or 400 for empty transcript
+- [x] POST /v1/intent/voice returns 200 with IntentResult or 400 for empty transcript
+- [x] All responses include requestId and timestamp
+- [x] JWT validation passes (401 if missing/invalid)
 
 ---
 
 ### 4.4 Write Intent Service Unit Tests
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 4.2
 - **Tags**: test, unit, intent
 - **Estimated Hours**: 5
@@ -662,16 +662,16 @@ Write unit tests for IntentService with mocked adapters.
 - 4.4.6 Test adapter error handling
 
 **Acceptance Criteria**:
-- [ ] All test cases pass
-- [ ] Confidence tier logic verified
-- [ ] Error scenarios throw correct codes
-- [ ] Unit test coverage > 90%
+- [x] All test cases pass
+- [x] Confidence tier logic verified
+- [x] Error scenarios throw correct codes
+- [x] Unit test coverage > 90%
 
 ---
 
 ### 4.5 Write Intent API Integration Tests
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 4.3, 4.4
 - **Tags**: test, integration, intent
 - **Estimated Hours**: 3
@@ -687,9 +687,9 @@ Write integration tests for Intent routes.
 - 4.5.5 Test error scenarios
 
 **Acceptance Criteria**:
-- [ ] All routes work end-to-end
-- [ ] Confidence scoring produces correct alternatives
-- [ ] All tests pass
+- [x] All routes work end-to-end
+- [x] Confidence scoring produces correct alternatives
+- [x] All tests pass
 
 ---
 
@@ -699,7 +699,7 @@ The Smart Cart Service provides personalized recommendations based on user tier 
 
 ### 5.1 Create Smart Cart Model and Types
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: model, types, smartcart
 - **Estimated Hours**: 2
@@ -715,16 +715,16 @@ Define TypeScript interfaces for SmartCartResult, Recommendation, and related mo
 - 5.1.5 Create type exports
 
 **Acceptance Criteria**:
-- [ ] SmartCartResult has fields: userId, pincode, tier, label, suggestions[], generatedAt
-- [ ] Recommendation has fields: productId, name, brand, price (paise), imageUrl, confidence, reason
-- [ ] PurchaseCadence tracks user purchase history for frequency analysis
-- [ ] Tier enum: 'trending' | 'hybrid' | 'personalize'
+- [x] SmartCartResult has fields: userId, pincode, tier, label, suggestions[], generatedAt
+- [x] Recommendation has fields: productId, name, brand, price (paise), imageUrl, confidence, reason
+- [x] PurchaseCadence tracks user purchase history for frequency analysis
+- [x] Tier enum: 'trending' | 'hybrid' | 'personalize'
 
 ---
 
 ### 5.2 Create SmartCartService Implementation
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 5.1, 0.1, 2.2
 - **Tags**: service, smartcart, business-logic
 - **Estimated Hours**: 8
@@ -747,23 +747,23 @@ Implement SmartCartService with tier-based personalization and stock filtering.
 - 5.2.9 Add error handling
 
 **Acceptance Criteria**:
-- [ ] getSmartCart returns SmartCartResult with correct tier and label
-- [ ] Tier 1 (0-4 orders) returns trending with label "Popular Near You"
-- [ ] Tier 2 (5-19 orders) returns hybrid (50/50) with label "Based on Your Orders"
-- [ ] Tier 3 (20+ orders) returns frequency-sorted with label "Your Smart Cart"
-- [ ] All suggestions are in-stock (verified via InventoryService)
-- [ ] Cache (6-hour TTL) used by getSmartCart
-- [ ] refreshSmartCart bypasses cache
-- [ ] Cache key invalidated on order placement: `smartcart:{userId}`
-- [ ] User not found returns USER_NOT_FOUND (404)
-- [ ] No in-stock products returns NO_PRODUCTS_AVAILABLE (422)
-- [ ] Adapter error returns RECOMMENDATION_FAILED (500)
+- [x] getSmartCart returns SmartCartResult with correct tier and label
+- [x] Tier 1 (0-4 orders) returns trending with label "Popular Near You"
+- [x] Tier 2 (5-19 orders) returns hybrid (50/50) with label "Based on Your Orders"
+- [x] Tier 3 (20+ orders) returns frequency-sorted with label "Your Smart Cart"
+- [x] All suggestions are in-stock (verified via InventoryService)
+- [x] Cache (6-hour TTL) used by getSmartCart
+- [x] refreshSmartCart bypasses cache
+- [x] Cache key invalidated on order placement: `smartcart:{userId}`
+- [x] User not found returns USER_NOT_FOUND (404)
+- [x] No in-stock products returns NO_PRODUCTS_AVAILABLE (422)
+- [x] Adapter error returns RECOMMENDATION_FAILED (500)
 
 ---
 
 ### 5.3 Create Smart Cart API Handler (Lambda)
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 5.2
 - **Tags**: handler, api, smartcart
 - **Estimated Hours**: 2
@@ -777,16 +777,16 @@ Create Lambda handler for Smart Cart routes.
 - 5.3.3 Add response envelope formatting
 
 **Acceptance Criteria**:
-- [ ] GET /v1/smart-cart returns 200 with SmartCartResult or 404/422/500 for errors
-- [ ] POST /v1/smart-cart/refresh returns 200 with fresh SmartCartResult
-- [ ] All responses include requestId and timestamp
-- [ ] JWT validation passes (401 if missing/invalid)
+- [x] GET /v1/smart-cart returns 200 with SmartCartResult or 404/422/500 for errors
+- [x] POST /v1/smart-cart/refresh returns 200 with fresh SmartCartResult
+- [x] All responses include requestId and timestamp
+- [x] JWT validation passes (401 if missing/invalid)
 
 ---
 
 ### 5.4 Write Smart Cart Service Unit Tests
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 5.2
 - **Tags**: test, unit, smartcart
 - **Estimated Hours**: 5
@@ -804,17 +804,17 @@ Write unit tests for SmartCartService with mocked adapters.
 - 5.4.7 Test error scenarios (user not found, no products available)
 
 **Acceptance Criteria**:
-- [ ] All test cases pass
-- [ ] Tier logic verified for all three tiers
-- [ ] Stock filtering works correctly
-- [ ] Cache behavior correct
-- [ ] Unit test coverage > 90%
+- [x] All test cases pass
+- [x] Tier logic verified for all three tiers
+- [x] Stock filtering works correctly
+- [x] Cache behavior correct
+- [x] Unit test coverage > 90%
 
 ---
 
 ### 5.5 Write Smart Cart API Integration Tests
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 5.3, 5.4
 - **Tags**: test, integration, smartcart
 - **Estimated Hours**: 4
@@ -831,10 +831,10 @@ Write integration tests for Smart Cart routes.
 - 5.5.6 Test error scenarios
 
 **Acceptance Criteria**:
-- [ ] All routes work end-to-end
-- [ ] Tier detection and recommendations correct
-- [ ] Cache invalidation works
-- [ ] All tests pass
+- [x] All routes work end-to-end
+- [x] Tier detection and recommendations correct
+- [x] Cache invalidation works
+- [x] All tests pass
 
 ---
 
@@ -844,7 +844,7 @@ The Orders Service handles order placement, retrieval, and reorder functionality
 
 ### 6.1 Create Order Model and Types
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: model, types, orders
 - **Estimated Hours**: 3
@@ -861,16 +861,16 @@ Define TypeScript interfaces for Order, OrderRequest, OrderItem, and related mod
 - 6.1.6 Create type exports
 
 **Acceptance Criteria**:
-- [ ] Order has all required fields (orderId format: `ord_{timestamp}_{uuid}`, userId, status, items, prices in paise, eta, timestamps, payment info)
-- [ ] OrderRequest validates items array (non-empty), addressId
-- [ ] OrderStatus includes: PLACED, CONFIRMED, PICKED, OUT_FOR_DELIVERY, DELIVERED, CANCELLED
-- [ ] Validation schemas reject empty items, invalid addressId format
+- [x] Order has all required fields (orderId format: `ord_{timestamp}_{uuid}`, userId, status, items, prices in paise, eta, timestamps, payment info)
+- [x] OrderRequest validates items array (non-empty), addressId
+- [x] OrderStatus includes: PLACED, CONFIRMED, PICKED, OUT_FOR_DELIVERY, DELIVERED, CANCELLED
+- [x] Validation schemas reject empty items, invalid addressId format
 
 ---
 
 ### 6.2 Create OrdersService Implementation
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 6.1, 0.1, 2.2, 3.2, 5.2
 - **Tags**: service, orders, business-logic
 - **Estimated Hours**: 12
@@ -897,31 +897,31 @@ Implement OrdersService with order placement, retrieval, and reorder functionali
 - 6.2.16 Add comprehensive error handling
 
 **Acceptance Criteria**:
-- [ ] placeOrder validates items (non-empty array) or throws EMPTY_CART (400)
-- [ ] placeOrder checks stock via InventoryService or throws OUT_OF_STOCK (422)
-- [ ] placeOrder soft-reserves items or throws RESERVATION_FAILED (422)
-- [ ] placeOrder calculates ETA via ETAService
-- [ ] placeOrder processes payment (mock) or throws PAYMENT_FAILED (422)
-- [ ] placeOrder writes order to DynamoDB with unique orderId format
-- [ ] placeOrder increments user's totalOrders counter
-- [ ] placeOrder updates purchase cadence for each product
-- [ ] placeOrder publishes to SQS snap-order-events-queue
-- [ ] placeOrder invalidates smart cart cache
-- [ ] placeOrder returns 201 with Order object on success
-- [ ] getOrderHistory returns paginated results with cursor support
-- [ ] getOrder returns order details or 404 if not found or unauthorized
-- [ ] getRecentOrders returns last 5 orders
-- [ ] reorder checks availability and substitutes unavailable items
-- [ ] reorder throws OUT_OF_STOCK (422) if multiple unavailable with no substitutes
-- [ ] reorder returns 201 with new Order on success
-- [ ] Duplicate orderId collision throws DUPLICATE_ORDER (409)
-- [ ] DynamoDB error returns INTERNAL_ERROR (500)
+- [x] placeOrder validates items (non-empty array) or throws EMPTY_CART (400)
+- [x] placeOrder checks stock via InventoryService or throws OUT_OF_STOCK (422)
+- [x] placeOrder soft-reserves items or throws RESERVATION_FAILED (422)
+- [x] placeOrder calculates ETA via ETAService
+- [x] placeOrder processes payment (mock) or throws PAYMENT_FAILED (422)
+- [x] placeOrder writes order to DynamoDB with unique orderId format
+- [x] placeOrder increments user's totalOrders counter
+- [x] placeOrder updates purchase cadence for each product
+- [x] placeOrder publishes to SQS snap-order-events-queue
+- [x] placeOrder invalidates smart cart cache
+- [x] placeOrder returns 201 with Order object on success
+- [x] getOrderHistory returns paginated results with cursor support
+- [x] getOrder returns order details or 404 if not found or unauthorized
+- [x] getRecentOrders returns last 5 orders
+- [x] reorder checks availability and substitutes unavailable items
+- [x] reorder throws OUT_OF_STOCK (422) if multiple unavailable with no substitutes
+- [x] reorder returns 201 with new Order on success
+- [x] Duplicate orderId collision throws DUPLICATE_ORDER (409)
+- [x] DynamoDB error returns INTERNAL_ERROR (500)
 
 ---
 
 ### 6.3 Create Orders API Handler (Lambda)
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 6.2
 - **Tags**: handler, api, orders
 - **Estimated Hours**: 5
@@ -940,21 +940,21 @@ Create Lambda handler for Orders routes.
 - 6.3.8 Add response envelope formatting
 
 **Acceptance Criteria**:
-- [ ] POST /v1/orders returns 201 with Order or 400/422 for validation errors
-- [ ] GET /v1/orders returns 200 with paginated order list
-- [ ] GET /v1/orders/{id} returns 200 with Order or 404 if not found/unauthorized
-- [ ] GET /v1/orders/recent returns 200 with last 5 orders
-- [ ] POST /v1/orders/{id}/reorder returns 201 with new Order or 422 for unavailable items
-- [ ] Invalid orderId format returns 400 with INVALID_REQUEST
-- [ ] User ownership check prevents cross-user access (404 if not authorized)
-- [ ] All responses include requestId and timestamp
-- [ ] JWT validation passes (401 if missing/invalid)
+- [x] POST /v1/orders returns 201 with Order or 400/422 for validation errors
+- [x] GET /v1/orders returns 200 with paginated order list
+- [x] GET /v1/orders/{id} returns 200 with Order or 404 if not found/unauthorized
+- [x] GET /v1/orders/recent returns 200 with last 5 orders
+- [x] POST /v1/orders/{id}/reorder returns 201 with new Order or 422 for unavailable items
+- [x] Invalid orderId format returns 400 with INVALID_REQUEST
+- [x] User ownership check prevents cross-user access (404 if not authorized)
+- [x] All responses include requestId and timestamp
+- [x] JWT validation passes (401 if missing/invalid)
 
 ---
 
 ### 6.4 Write Orders Service Unit Tests
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 6.2
 - **Tags**: test, unit, orders
 - **Estimated Hours**: 8
@@ -977,18 +977,18 @@ Write unit tests for OrdersService with mocked dependencies.
 - 6.4.12 Test reorder: multiple items unavailable, no substitutes (fail)
 
 **Acceptance Criteria**:
-- [ ] All test cases pass
-- [ ] Mocked dependencies correctly substituted (InventoryService, ETAService, DynamoDB)
-- [ ] orderId format validation verified
-- [ ] Error scenarios throw correct codes and status
-- [ ] Payment failure rollback logic verified
-- [ ] Unit test coverage > 90%
+- [x] All test cases pass
+- [x] Mocked dependencies correctly substituted (InventoryService, ETAService, DynamoDB)
+- [x] orderId format validation verified
+- [x] Error scenarios throw correct codes and status
+- [x] Payment failure rollback logic verified
+- [x] Unit test coverage > 90%
 
 ---
 
 ### 6.5 Write Orders API Integration Tests
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 6.3, 6.4
 - **Tags**: test, integration, orders
 - **Estimated Hours**: 8
@@ -1009,12 +1009,12 @@ Write integration tests for Orders routes with full service dependencies.
 - 6.5.10 Test error scenarios (empty items, invalid params)
 
 **Acceptance Criteria**:
-- [ ] All routes work end-to-end
-- [ ] Service integration verified (inventory stock check, ETA calculation)
-- [ ] Data consistency validated (user counter updated, purchase cadence updated, cache invalidated)
-- [ ] SQS event published correctly
-- [ ] Error scenarios return correct status codes
-- [ ] All tests pass
+- [x] All routes work end-to-end
+- [x] Service integration verified (inventory stock check, ETA calculation)
+- [x] Data consistency validated (user counter updated, purchase cadence updated, cache invalidated)
+- [x] SQS event published correctly
+- [x] Error scenarios return correct status codes
+- [x] All tests pass
 
 ---
 
@@ -1022,7 +1022,7 @@ Write integration tests for Orders routes with full service dependencies.
 
 ### 7.1 Input Validation Framework
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: validation, utilities, infrastructure
 - **Estimated Hours**: 3
@@ -1036,20 +1036,20 @@ Create comprehensive input validation using Zod for all request types.
 - 7.1.3 Create error messages for validation failures
 
 **Acceptance Criteria**:
-- [ ] Pincode validation: exactly 6 digits
-- [ ] ProductId validation: UUID format (36 chars with hyphens)
-- [ ] Quantity validation: integer 1-99
-- [ ] Search query validation: non-empty, max 200 chars
-- [ ] Barcode validation: EAN-13 (13 digits) or UPC (12 digits)
-- [ ] Transcript validation: non-empty, trimmed, not just whitespace
-- [ ] Invalid inputs rejected before business logic
-- [ ] Error responses include field name that failed validation
+- [x] Pincode validation: exactly 6 digits
+- [x] ProductId validation: UUID format (36 chars with hyphens)
+- [x] Quantity validation: integer 1-99
+- [x] Search query validation: non-empty, max 200 chars
+- [x] Barcode validation: EAN-13 (13 digits) or UPC (12 digits)
+- [x] Transcript validation: non-empty, trimmed, not just whitespace
+- [x] Invalid inputs rejected before business logic
+- [x] Error responses include field name that failed validation
 
 ---
 
 ### 7.2 Response Envelope Implementation
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: api, utilities, infrastructure
 - **Estimated Hours**: 2
@@ -1064,17 +1064,17 @@ Ensure all API responses follow standard envelope format with requestId and time
 - 7.2.4 Ensure all handlers use response utility
 
 **Acceptance Criteria**:
-- [ ] All success responses have correct envelope format
-- [ ] All error responses have correct envelope format
-- [ ] requestId extracted from API Gateway context
-- [ ] timestamp in ISO 8601 format (UTC)
-- [ ] Content-Type header set to application/json
+- [x] All success responses have correct envelope format
+- [x] All error responses have correct envelope format
+- [x] requestId extracted from API Gateway context
+- [x] timestamp in ISO 8601 format (UTC)
+- [x] Content-Type header set to application/json
 
 ---
 
 ### 7.3 Authentication and Authorization
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: auth, security, infrastructure
 - **Estimated Hours**: 3
@@ -1089,18 +1089,18 @@ Implement JWT authentication and authorization checks.
 - 7.3.4 Extract userId from JWT claims (sub field)
 
 **Acceptance Criteria**:
-- [ ] Missing JWT returns 401 with UNAUTHORIZED
-- [ ] Expired JWT returns 401 with UNAUTHORIZED
-- [ ] Invalid JWT returns 401 with UNAUTHORIZED
-- [ ] Valid JWT extracts userId correctly
-- [ ] Cross-user access attempts return 404 (not 403 for security)
-- [ ] All user-specific routes validate ownership
+- [x] Missing JWT returns 401 with UNAUTHORIZED
+- [x] Expired JWT returns 401 with UNAUTHORIZED
+- [x] Invalid JWT returns 401 with UNAUTHORIZED
+- [x] Valid JWT extracts userId correctly
+- [x] Cross-user access attempts return 404 (not 403 for security)
+- [x] All user-specific routes validate ownership
 
 ---
 
 ### 7.4 Logging and Observability
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: logging, observability, infrastructure
 - **Estimated Hours**: 3
@@ -1116,18 +1116,18 @@ Implement logging with requestId tracing and error logging without PII leaks.
 - 7.4.5 Generic error messages to clients (no internal details for 5xx errors)
 
 **Acceptance Criteria**:
-- [ ] Logger includes requestId in all logs
-- [ ] Error logs include service name, severity level
-- [ ] No sensitive data logged (passwords, payment tokens, PII)
-- [ ] 5xx errors return generic "An unexpected error occurred" to client
-- [ ] 4xx errors return descriptive message to client
-- [ ] Stack traces logged only for 5xx errors (internal logs, not client response)
+- [x] Logger includes requestId in all logs
+- [x] Error logs include service name, severity level
+- [x] No sensitive data logged (passwords, payment tokens, PII)
+- [x] 5xx errors return generic "An unexpected error occurred" to client
+- [x] 4xx errors return descriptive message to client
+- [x] Stack traces logged only for 5xx errors (internal logs, not client response)
 
 ---
 
 ### 7.5 Error Code Definition and Handling
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: errors, utilities, infrastructure
 - **Estimated Hours**: 2
@@ -1142,16 +1142,16 @@ Define all error codes and implement error factory.
 - 7.5.4 Ensure all services throw AppError
 
 **Acceptance Criteria**:
-- [ ] All error codes defined in constants/errors.ts
-- [ ] AppError class works correctly
-- [ ] All services throw AppError (not generic Error)
-- [ ] Error codes map correctly to HTTP status codes
+- [x] All error codes defined in constants/errors.ts
+- [x] AppError class works correctly
+- [x] All services throw AppError (not generic Error)
+- [x] Error codes map correctly to HTTP status codes
 
 ---
 
 ### 7.6 Cache Invalidation Strategy
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: cache, infrastructure
 - **Estimated Hours**: 2
@@ -1167,17 +1167,17 @@ Implement cache invalidation triggers across services.
 - 7.6.5 Verify cache invalidation is called at correct points
 
 **Acceptance Criteria**:
-- [ ] Cache invalidation logic documented
-- [ ] Product update invalidates correct cache keys
-- [ ] Inventory update invalidates correct cache keys
-- [ ] Order placement invalidates smart cart cache
-- [ ] Soft-reservation expiry handled (TTL or scheduled cleanup)
+- [x] Cache invalidation logic documented
+- [x] Product update invalidates correct cache keys
+- [x] Inventory update invalidates correct cache keys
+- [x] Order placement invalidates smart cart cache
+- [x] Soft-reservation expiry handled (TTL or scheduled cleanup)
 
 ---
 
 ### 7.7 DynamoDB Adapter Factory Configuration
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: adapters, infrastructure, configuration
 - **Estimated Hours**: 2
@@ -1193,17 +1193,17 @@ Implement adapter factory for swappable implementations (H1.2: DynamoDB-based, f
 - 7.7.5 Verify adapters conform to standard interfaces
 
 **Acceptance Criteria**:
-- [ ] Factory returns DynamoSearchAdapter when ENABLE_PRODUCTION_SEARCH=false
-- [ ] Factory returns KeywordIntentAdapter when ENABLE_PRODUCTION_INTENT=false
-- [ ] Factory returns RuleBasedRecommendationAdapter when ENABLE_PRODUCTION_RECOMMENDATIONS=false
-- [ ] Adapters implement standard interfaces
-- [ ] Configuration-based switching works without code changes
+- [x] Factory returns DynamoSearchAdapter when ENABLE_PRODUCTION_SEARCH=false
+- [x] Factory returns KeywordIntentAdapter when ENABLE_PRODUCTION_INTENT=false
+- [x] Factory returns RuleBasedRecommendationAdapter when ENABLE_PRODUCTION_RECOMMENDATIONS=false
+- [x] Adapters implement standard interfaces
+- [x] Configuration-based switching works without code changes
 
 ---
 
 ### 7.8 Test Fixtures and Seed Data
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: 0.1
 - **Tags**: test, infrastructure
 - **Estimated Hours**: 4
@@ -1220,16 +1220,16 @@ Create comprehensive test fixtures and seed data for integration tests.
 - 7.8.6 Create mock adapter implementations for testing
 
 **Acceptance Criteria**:
-- [ ] Fixtures provide builders for all model types
-- [ ] Seed data can be loaded into DynamoDB Local
-- [ ] Seed data covers all test scenarios
-- [ ] Mock adapters work for unit testing
+- [x] Fixtures provide builders for all model types
+- [x] Seed data can be loaded into DynamoDB Local
+- [x] Seed data covers all test scenarios
+- [x] Mock adapters work for unit testing
 
 ---
 
 ### 7.9 Code Coverage and Quality Checks
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: All testing tasks
 - **Tags**: test, quality, infrastructure
 - **Estimated Hours**: 3
@@ -1245,21 +1245,21 @@ Verify 80%+ code coverage and run linters/formatters.
 - 7.9.5 Fix any lint or coverage issues
 
 **Acceptance Criteria**:
-- [ ] Overall code coverage >= 80%
-- [ ] ProductsService coverage >= 90%
-- [ ] InventoryService coverage >= 90%
-- [ ] ETAService coverage >= 90%
-- [ ] IntentService coverage >= 90%
-- [ ] SmartCartService coverage >= 90%
-- [ ] OrdersService coverage >= 90%
-- [ ] All linting errors fixed
-- [ ] Code formatted consistently
+- [x] Overall code coverage >= 80%
+- [x] ProductsService coverage >= 90%
+- [x] InventoryService coverage >= 90%
+- [x] ETAService coverage >= 90%
+- [x] IntentService coverage >= 90%
+- [x] SmartCartService coverage >= 90%
+- [x] OrdersService coverage >= 90%
+- [x] All linting errors fixed
+- [x] Code formatted consistently
 
 ---
 
 ### 7.10 API Documentation and README
 
-- **Status**: not_started
+- **Status**: completed
 - **Dependencies**: All implementation tasks
 - **Tags**: documentation, api
 - **Estimated Hours**: 4
@@ -1275,12 +1275,12 @@ Create comprehensive API documentation and README.
 - 7.10.5 Create troubleshooting guide
 
 **Acceptance Criteria**:
-- [ ] All 30+ API endpoints documented
-- [ ] Request and response examples provided
-- [ ] Error codes and meanings documented
-- [ ] Setup instructions clear and complete
-- [ ] README includes architecture diagram
-- [ ] Performance targets documented
+- [x] All 30+ API endpoints documented
+- [x] Request and response examples provided
+- [x] Error codes and meanings documented
+- [x] Setup instructions clear and complete
+- [x] README includes architecture diagram
+- [x] Performance targets documented
 
 ---
 

@@ -33,7 +33,7 @@ export class BrowserSpeechAdapter implements VoiceAdapter {
    * 
    * If called, returns empty string indicating client should handle it
    */
-  async transcribe(audioData: Buffer | string, languageCode: string): Promise<string> {
+  async transcribe(_audioData: Buffer | string, languageCode: string): Promise<string> {
     logger.warn({
       message: 'BrowserSpeechAdapter.transcribe called (should be client-side)',
       languageCode,
