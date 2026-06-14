@@ -31,7 +31,7 @@
     "serverless:offline:build": "npx tsc-alias --project tsconfig.serverless.json && cross-env serverless offline start --stage dev",
     "seed:dev": "ts-node --project scripts/tsconfig.json -r tsconfig-paths/register scripts/seed-dev-data.ts",
     "tables:local": "ts-node --project scripts/tsconfig.json -r tsconfig-paths/register scripts/create-local-tables.ts",
-    "prepare": "husky install",
+    "prepare": "cd .. && husky",
     "precommit": "lint-staged"
   },
   "keywords": [

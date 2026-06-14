@@ -2,6 +2,21 @@
 # Product: AmazonGo
 # Tagline: Get everything on the Go
 
+# ── Backend subdirectory ignores ──────────────────────────────────────────────
+backend/node_modules/
+backend/.build/
+backend/dist/
+backend/coverage/
+backend/.env
+backend/.env.local
+backend/.env.development
+backend/.env.staging
+backend/.env.production
+backend/cdk.out/
+backend/.serverless/
+backend/package-lock.json
+
+# ── Root-level ignores ────────────────────────────────────────────────────────
 # Dependencies
 node_modules/
 npm-debug.log*

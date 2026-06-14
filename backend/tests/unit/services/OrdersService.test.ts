@@ -130,7 +130,7 @@ describe('generateOrderId', () => {
 
 describe('placeOrder', () => {
   it('success: returns an Order with correct orderId format, calculated totals, and COMPLETED paymentStatus', async () => {
-    mockedGetItem.mockResolvedValueOnce(productFixture);
+    mockedQueryItems.mockResolvedValueOnce({ items: [productFixture], nextCursor: undefined });
     mockedPutItem.mockResolvedValueOnce(undefined);
     mockedUpdateItem.mockResolvedValueOnce(undefined);
     mockedCacheDel.mockResolvedValueOnce(undefined);
@@ -160,7 +160,7 @@ describe('placeOrder', () => {
   });
 
   it('product not found: throws AppError PRODUCT_NOT_FOUND (404)', async () => {
-    mockedGetItem.mockResolvedValueOnce(null);
+    mockedQueryItems.mockResolvedValueOnce({ items: [], nextCursor: undefined });
 
     const error = await placeOrder('user_001', orderRequestFixture).catch((e: unknown) => e);
 
@@ -169,7 +169,7 @@ describe('placeOrder', () => {
   });
 
   it('duplicate orderId: throws AppError DUPLICATE_ORDER (409) when putItem throws ConditionalCheckFailedException', async () => {
-    mockedGetItem.mockResolvedValueOnce(productFixture);
+    mockedQueryItems.mockResolvedValueOnce({ items: [productFixture], nextCursor: undefined });
 
     const conditionalError = Object.assign(new Error('The conditional request failed'), {
       name: 'ConditionalCheckFailedException',
@@ -183,7 +183,7 @@ describe('placeOrder', () => {
   });
 
   it('invalidates smart cart cache with key smartcart:{userId}', async () => {
-    mockedGetItem.mockResolvedValueOnce(productFixture);
+    mockedQueryItems.mockResolvedValueOnce({ items: [productFixture], nextCursor: undefined });
     mockedPutItem.mockResolvedValueOnce(undefined);
     mockedUpdateItem.mockResolvedValueOnce(undefined);
     mockedCacheDel.mockResolvedValueOnce(undefined);
@@ -194,7 +194,7 @@ describe('placeOrder', () => {
   });
 
   it('cache invalidation failure does not throw — order is still returned', async () => {
-    mockedGetItem.mockResolvedValueOnce(productFixture);
+    mockedQueryItems.mockResolvedValueOnce({ items: [productFixture], nextCursor: undefined });
     mockedPutItem.mockResolvedValueOnce(undefined);
     mockedUpdateItem.mockResolvedValueOnce(undefined);
     mockedCacheDel.mockRejectedValueOnce(new Error('Cache unavailable'));
@@ -205,7 +205,7 @@ describe('placeOrder', () => {
   });
 
   it('uses default paymentMethod amazon_pay when not provided', async () => {
-    mockedGetItem.mockResolvedValueOnce(productFixture);
+    mockedQueryItems.mockResolvedValueOnce({ items: [productFixture], nextCursor: undefined });
     mockedPutItem.mockResolvedValueOnce(undefined);
     mockedUpdateItem.mockResolvedValueOnce(undefined);
     mockedCacheDel.mockResolvedValueOnce(undefined);
@@ -229,6 +229,7 @@ describe('getOrder', () => {
 
     expect(order).toEqual(orderFixture);
     expect(mockedGetItem).toHaveBeenCalledWith('Dev-SnapOrders', {
+      userId: 'user_001',
       orderId: 'ord_1704067200000_abc123',
     });
   });
@@ -334,8 +335,8 @@ describe('reorder', () => {
   it('success: creates a new order from an existing order, returning a new orderId', async () => {
     // First getItem call: fetches original order
     mockedGetItem.mockResolvedValueOnce(orderFixture);
-    // Second getItem call: fetches product details for re-order
-    mockedGetItem.mockResolvedValueOnce(productFixture);
+    // queryItems call: fetches product details for re-order (queryItems used for composite key)
+    mockedQueryItems.mockResolvedValueOnce({ items: [productFixture], nextCursor: undefined });
     mockedPutItem.mockResolvedValueOnce(undefined);
     mockedUpdateItem.mockResolvedValueOnce(undefined);
     mockedCacheDel.mockResolvedValueOnce(undefined);

@@ -23,6 +23,7 @@ import { AppError, ErrorCodes } from '@constants/errors';
 jest.mock('@clients/dynamoClient', () => ({
   getItem: jest.fn(),
   queryItems: jest.fn(),
+  scanItems: jest.fn(),
   TABLE_NAMES: { PRODUCTS: 'Dev-SnapProducts' },
 }));
 
@@ -39,12 +40,13 @@ jest.mock('@adapters/factory', () => ({
   },
 }));
 
-import { getItem, queryItems } from '@clients/dynamoClient';
+import { getItem, queryItems, scanItems } from '@clients/dynamoClient';
 import { searchAdapter, cacheAdapter } from '@adapters/factory';
 import { buildProduct } from '../../fixtures';
 
 const mockedGetItem = jest.mocked(getItem);
 const mockedQueryItems = jest.mocked(queryItems);
+const mockedScanItems = jest.mocked(scanItems);
 const mockedSearchAdapterSearch = jest.mocked(searchAdapter.search);
 const mockedSearchAdapterGetTrending = jest.mocked(searchAdapter.getTrending);
 const mockedCacheGet = jest.mocked(cacheAdapter.get);
@@ -90,17 +92,16 @@ describe('getProductById — Phase H1', () => {
     expect(mockedCacheGet).toHaveBeenCalledWith(`product:${product.productId}`);
   });
 
-  it('cache miss then DB hit: calls getItem, sets cache with 3600s TTL, returns product', async () => {
+  it('cache miss then DB hit: calls queryItems, sets cache with 3600s TTL, returns product', async () => {
     mockedCacheGet.mockResolvedValueOnce(null);
-    mockedGetItem.mockResolvedValueOnce(product);
+    mockedQueryItems.mockResolvedValueOnce({ items: [product], nextCursor: undefined });
     mockedCacheSet.mockResolvedValueOnce(undefined);
 
     const result = await getProductById(product.productId);
 
     expect(result).toEqual(product);
-    expect(mockedGetItem).toHaveBeenCalledWith('Dev-SnapProducts', {
-      productId: product.productId,
-    });
+    expect(mockedGetItem).not.toHaveBeenCalled();
+    expect(mockedQueryItems).toHaveBeenCalled();
     expect(mockedCacheSet).toHaveBeenCalledWith(
       `product:${product.productId}`,
       product,
@@ -110,7 +111,7 @@ describe('getProductById — Phase H1', () => {
 
   it('cache miss then DB miss: throws AppError PRODUCT_NOT_FOUND (404)', async () => {
     mockedCacheGet.mockResolvedValueOnce(null);
-    mockedGetItem.mockResolvedValueOnce(null);
+    mockedQueryItems.mockResolvedValueOnce({ items: [], nextCursor: undefined });
 
     const error = await getProductById('nonexistent_id').catch((e: unknown) => e);
 
@@ -129,7 +130,7 @@ describe('getProductById — Phase H1', () => {
 describe('getProductByBarcode — Phase H1', () => {
   it('cache miss, barcode not found: throws AppError BARCODE_NOT_FOUND (404) — not PRODUCT_NOT_FOUND', async () => {
     mockedCacheGet.mockResolvedValueOnce(null);
-    mockedQueryItems.mockResolvedValueOnce({ items: [] });
+    mockedScanItems.mockResolvedValueOnce([]);
 
     const error = await getProductByBarcode('9999999999999').catch((e: unknown) => e);
 

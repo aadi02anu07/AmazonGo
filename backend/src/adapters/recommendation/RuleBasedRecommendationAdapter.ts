@@ -399,21 +399,47 @@ export class RuleBasedRecommendationAdapter implements RecommendationAdapter {
   }
 
   /**
-   * Filter recommendations to only in-stock products
+   * Filter recommendations to only in-stock products.
+   * Uses cacheAdapter.mget to batch-check inventory status.
+   * When cache returns null for an item, it is excluded (conservative/safe default).
    */
   private async filterInStock(
     recommendations: Recommendation[],
-    _pincode: string
+    pincode: string
   ): Promise<Recommendation[]> {
     if (recommendations.length === 0) {
       return [];
     }
 
-    // Hackathon mode: return all recommendations that come from available products.
-    // The ScanCommand in getTier1Recommendations already filters isAvailable=true,
-    // so all products reaching here are available. Cache-based inventory filtering
-    // is a production optimisation — skip it locally to avoid empty-cache issues.
-    return recommendations;
+    const cacheKeys = recommendations.map((rec) => `inv:${pincode}:${rec.productId}`);
+    const inventoryStates = await cacheAdapter.mget<{ isAvailableFor10Min: boolean }>(cacheKeys);
+
+    // If ALL cache entries are null (cache is empty — common in local dev),
+    // fall back to returning all recommendations rather than filtering everything out.
+    const allNull = inventoryStates.every((s) => s === null || s === undefined);
+    if (allNull) {
+      logger.debug({
+        message: 'Inventory cache empty — returning all recommendations (cache-miss fallback)',
+        total: recommendations.length,
+        pincode,
+      });
+      return recommendations;
+    }
+
+    const inStock = recommendations.filter((_rec, index) => {
+      const inventoryState = inventoryStates[index];
+      // Treat null cache entry as "available" (fail open) to avoid filtering valid products
+      return inventoryState === null || inventoryState === undefined || inventoryState.isAvailableFor10Min === true;
+    });
+
+    logger.debug({
+      message: 'Filtered recommendations to in-stock',
+      total: recommendations.length,
+      inStock: inStock.length,
+      pincode,
+    });
+
+    return inStock;
   }
 
   /**

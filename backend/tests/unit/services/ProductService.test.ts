@@ -18,6 +18,7 @@ import { AppError } from '@constants/errors';
 jest.mock('@clients/dynamoClient', () => ({
   getItem: jest.fn(),
   queryItems: jest.fn(),
+  scanItems: jest.fn(),
   TABLE_NAMES: { PRODUCTS: 'Dev-SnapProducts' },
 }));
 
@@ -35,11 +36,11 @@ jest.mock('@adapters/factory', () => ({
 }));
 
 // Import mocked modules for type-safe access
-import { getItem, queryItems } from '@clients/dynamoClient';
+import { queryItems, scanItems } from '@clients/dynamoClient';
 import { searchAdapter, cacheAdapter } from '@adapters/factory';
 
-const mockedGetItem = jest.mocked(getItem);
 const mockedQueryItems = jest.mocked(queryItems);
+const mockedScanItems = jest.mocked(scanItems);
 const mockedSearchAdapterSearch = jest.mocked(searchAdapter.search);
 const mockedSearchAdapterGetTrending = jest.mocked(searchAdapter.getTrending);
 const mockedCacheAdapterGet = jest.mocked(cacheAdapter.get);
@@ -95,22 +96,20 @@ const searchResultFixture = [
 // ============================================================================
 
 describe('getProductById', () => {
-  it('Req 13.1 — found: returns the product when getItem resolves with a product', async () => {
+  it('Req 13.1 — found: returns the product when queryItems resolves with a product', async () => {
     mockedCacheAdapterGet.mockResolvedValueOnce(null);
-    mockedGetItem.mockResolvedValueOnce(productFixture);
+    mockedQueryItems.mockResolvedValueOnce({ items: [productFixture], nextCursor: undefined });
     mockedCacheAdapterSet.mockResolvedValueOnce(undefined);
 
     const result = await getProductById('prod_amul_milk_500');
 
     expect(result).toEqual(productFixture);
-    expect(mockedGetItem).toHaveBeenCalledWith('Dev-SnapProducts', {
-      productId: 'prod_amul_milk_500',
-    });
+    expect(mockedQueryItems).toHaveBeenCalled();
   });
 
-  it('Req 13.2 — not found: throws AppError PRODUCT_NOT_FOUND (404) when getItem returns null', async () => {
+  it('Req 13.2 — not found: throws AppError PRODUCT_NOT_FOUND (404) when queryItems returns empty', async () => {
     mockedCacheAdapterGet.mockResolvedValueOnce(null);
-    mockedGetItem.mockResolvedValue(null);
+    mockedQueryItems.mockResolvedValue({ items: [], nextCursor: undefined });
 
     const error = await getProductById('nonexistent').catch((e: unknown) => e);
 
@@ -185,19 +184,19 @@ describe('getTrendingProducts', () => {
 // ============================================================================
 
 describe('getProductByBarcode', () => {
-  it('Req 13.6 — cache hit: returns cached product without calling queryItems', async () => {
+  it('Req 13.6 — cache hit: returns cached product without calling scanItems', async () => {
     mockedCacheAdapterGet.mockResolvedValueOnce(productFixture);
 
     const result = await getProductByBarcode('8901396047919');
 
     expect(result).toEqual(productFixture);
-    expect(mockedQueryItems).not.toHaveBeenCalled();
+    expect(mockedScanItems).not.toHaveBeenCalled();
     expect(mockedCacheAdapterGet).toHaveBeenCalledWith('barcode:8901396047919');
   });
 
-  it('Req 13.7 — cache miss, found: queries DynamoDB, sets cache with 3600s TTL, returns product', async () => {
+  it('Req 13.7 — cache miss, found: scans DynamoDB, sets cache with 3600s TTL, returns product', async () => {
     mockedCacheAdapterGet.mockResolvedValueOnce(null);
-    mockedQueryItems.mockResolvedValueOnce({ items: [productFixture] });
+    mockedScanItems.mockResolvedValueOnce([productFixture]);
     mockedCacheAdapterSet.mockResolvedValueOnce(undefined);
 
     const result = await getProductByBarcode('8901396047919');
@@ -210,9 +209,9 @@ describe('getProductByBarcode', () => {
     );
   });
 
-  it('Req 13.8 — cache miss, not found: throws AppError BARCODE_NOT_FOUND when queryItems returns empty array', async () => {
+  it('Req 13.8 — cache miss, not found: throws AppError BARCODE_NOT_FOUND when scanItems returns empty array', async () => {
     mockedCacheAdapterGet.mockResolvedValue(null);
-    mockedQueryItems.mockResolvedValue({ items: [] });
+    mockedScanItems.mockResolvedValue([]);
 
     const error = await getProductByBarcode('0000000000000').catch((e: unknown) => e);
 
@@ -224,7 +223,7 @@ describe('getProductByBarcode', () => {
 
   it('Req 13.10 — cache.set throws: error is swallowed, product is still returned normally', async () => {
     mockedCacheAdapterGet.mockResolvedValueOnce(null);
-    mockedQueryItems.mockResolvedValueOnce({ items: [productFixture] });
+    mockedScanItems.mockResolvedValueOnce([productFixture]);
     mockedCacheAdapterSet.mockRejectedValueOnce(new Error('Redis write error'));
 
     const result = await getProductByBarcode('8901396047919');

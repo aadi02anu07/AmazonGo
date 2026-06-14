@@ -14,7 +14,7 @@
  * Model: @models/Product
  */
 
-import { getItem, queryItems, scanItems, TABLE_NAMES } from '@clients/dynamoClient';
+import { queryItems, scanItems, TABLE_NAMES } from '@clients/dynamoClient';
 import { searchAdapter, cacheAdapter } from '@adapters/factory';
 import { logger } from '@utils/logger';
 import { AppError, ErrorCodes } from '@constants/errors';
