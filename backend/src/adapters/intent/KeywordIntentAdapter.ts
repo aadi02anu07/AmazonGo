@@ -45,30 +45,94 @@ export class KeywordIntentAdapter implements IntentResolutionAdapter {
 
   // Stop words to exclude from tokenization
   private readonly stopWords = new Set([
-    'a',
-    'an',
-    'the',
-    'is',
-    'are',
-    'was',
-    'were',
-    'for',
-    'of',
-    'in',
-    'on',
-    'at',
-    'to',
-    'from',
-    'with',
-    'and',
-    'or',
-    'but',
-    'i',
-    'need',
-    'want',
-    'get',
-    'buy',
+    'a', 'an', 'the', 'is', 'are', 'was', 'were', 'for', 'of', 'in', 'on',
+    'at', 'to', 'from', 'with', 'and', 'or', 'but', 'i', 'need', 'want',
+    'get', 'buy', 'make', 'making', 'cook', 'cooking', 'some', 'me', 'my',
+    'us', 'we', 'have', 'has', 'do', 'did', 'will', 'just', 'please',
+    'tonight', 'today', 'now', 'quickly', 'fast', 'urgent', 'order',
   ]);
+
+  /**
+   * Synonym / intent expansion map.
+   * Maps a word the user might say → product keywords that exist in the catalog.
+   * Enables natural language queries like "pasta", "sick child", "upset stomach".
+   */
+  private readonly synonymMap: Record<string, string[]> = {
+    // Food / recipe intent
+    pasta:        ['noodles', 'maggi'],
+    noodle:       ['noodles', 'maggi'],
+    magi:         ['maggi', 'noodles'],
+    instant:      ['maggi', 'noodles'],
+    breakfast:    ['bread', 'milk', 'eggs', 'butter'],
+    chai:         ['milk', 'tea'],
+    tea:          ['milk'],
+    roti:         ['atta', 'flour', 'wheat'],
+    chapati:      ['atta', 'flour'],
+    dosa:         ['rice', 'oil'],
+    fry:          ['oil', 'butter'],
+    bake:         ['flour', 'atta', 'butter', 'sugar'],
+    dal:          ['toor', 'lentil'],
+    curry:        ['oil', 'tomatoes', 'onions', 'salt'],
+    sabzi:        ['tomatoes', 'onions', 'oil'],
+    salad:        ['tomatoes', 'onions'],
+    sandwich:     ['bread', 'butter'],
+    omelette:     ['eggs', 'oil', 'butter'],
+    boiled:       ['eggs'],
+    khichdi:      ['rice', 'dal', 'toor'],
+    biryani:      ['rice', 'oil', 'onions'],
+    pulao:        ['rice'],
+    juice:        ['tropicana', 'orange'],
+    snack:        ['chips', 'lays', 'kurkure', 'biscuit'],
+    munchies:     ['chips', 'kurkure', 'namkeen', 'haldirams'],
+    sweet:        ['biscuit', 'cookies', 'sugar'],
+    thirsty:      ['water', 'bisleri', 'juice', 'pepsi', 'coke'],
+    hydrate:      ['water', 'bisleri', 'ors', 'electral'],
+    // Health / medicine intent
+    sick:         ['fever', 'paracetamol', 'crocin'],
+    fever:        ['crocin', 'calpol', 'paracetamol'],
+    cold:         ['vicks', 'strepsils', 'cough'],
+    cough:        ['strepsils', 'vicks'],
+    headache:     ['disprin', 'crocin', 'pain'],
+    pain:         ['iodex', 'disprin', 'crocin'],
+    stomach:      ['gelusil', 'antacid', 'digestion'],
+    acidity:      ['gelusil', 'antacid'],
+    dehydrated:   ['electral', 'ors'],
+    wound:        ['betadine', 'antiseptic'],
+    vitamin:      ['zincovit', 'multivitamin'],
+    supplement:   ['zincovit', 'vitamin'],
+    medicine:     ['crocin', 'fever', 'tablet'],
+    tablet:       ['crocin', 'disprin', 'gelusil'],
+    syrup:        ['calpol'],
+    baby:         ['calpol', 'johnson', 'pampers'],
+    child:        ['calpol', 'johnson'],
+    // Household intent
+    clean:        ['detergent', 'vim', 'lizol', 'colin'],
+    wash:         ['detergent', 'surf', 'ariel'],
+    laundry:      ['surf', 'ariel', 'detergent'],
+    dishes:       ['vim', 'dishwash'],
+    mosquito:     ['goodnight', 'repellent'],
+    cockroach:    ['black flag', 'insecticide'],
+    toilet:       ['harpic', 'tissue'],
+    bathroom:     ['harpic', 'tissue', 'dettol'],
+    floor:        ['lizol', 'phenyl'],
+    glass:        ['colin'],
+    // Personal care intent
+    bath:         ['soap', 'dove', 'dettol'],
+    shower:       ['soap', 'dove'],
+    shampoo:      ['head shoulders', 'pantene', 'johnson'],
+    hair:         ['shampoo', 'parachute', 'coconut'],
+    teeth:        ['colgate', 'toothpaste'],
+    brush:        ['colgate', 'toothpaste'],
+    skin:         ['dove', 'nivea', 'vaseline', 'soap'],
+    lotion:       ['vaseline', 'nivea'],
+    moisturizer:  ['vaseline', 'nivea'],
+    shave:        ['gillette'],
+    diaper:       ['pampers'],
+    // Common quantity/urgency words — map to most-bought items
+    urgent:       ['crocin', 'fever', 'milk'],
+    emergency:    ['crocin', 'fever', 'medicine'],
+    running_out:  ['milk', 'eggs', 'bread'],
+  };
 
   // Confidence thresholds
   private readonly CONFIDENCE_SINGLE_THRESHOLD = parseFloat(
@@ -109,6 +173,25 @@ export class KeywordIntentAdapter implements IntentResolutionAdapter {
       .split(/\s+/)
       .filter((token) => token.length > 1) // Remove single characters
       .filter((token) => !this.stopWords.has(token));
+  }
+
+  /**
+   * Expand tokens with synonyms.
+   * e.g. ["pasta"] → ["pasta", "noodles", "maggi"]
+   * Deduplicates the result.
+   */
+  private expandWithSynonyms(tokens: string[]): string[] {
+    const expanded = new Set<string>(tokens);
+    for (const token of tokens) {
+      const synonyms = this.synonymMap[token];
+      if (synonyms) {
+        for (const s of synonyms) {
+          // synonyms may be multi-word (e.g. "head shoulders") — split and add each
+          s.split(/\s+/).forEach((w) => expanded.add(w));
+        }
+      }
+    }
+    return Array.from(expanded);
   }
 
   /**
@@ -182,10 +265,11 @@ export class KeywordIntentAdapter implements IntentResolutionAdapter {
         intentMode: 'keyword',
       });
 
-      // Tokenize input
-      const tokens = this.tokenize(transcript);
+      // Tokenize input and expand with synonyms
+      const rawTokens = this.tokenize(transcript);
+      const tokens = this.expandWithSynonyms(rawTokens);
 
-      if (tokens.length === 0) {
+      if (rawTokens.length === 0) {
         logger.warn({
           message: 'Empty intent after tokenization',
           transcript,
@@ -277,7 +361,8 @@ export class KeywordIntentAdapter implements IntentResolutionAdapter {
         transcript,
         topProductId: topProduct.productId,
         confidence,
-        matchedTokens: tokens.length,
+        rawTokens,
+        expandedTokens: tokens,
         durationMs: duration,
         adapter: 'KeywordIntent',
         intentMode: 'keyword',

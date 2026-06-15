@@ -71,6 +71,16 @@ custom:
 package:
   individually: false
   patterns:
+    - '!node_modules/**'
+    # Re-include only non-AWS runtime dependencies not available in Lambda runtime
+    - 'node_modules/zod/**'
+    - 'node_modules/uuid/**'
+    - 'node_modules/ioredis/**'
+    - 'node_modules/@opensearch-project/**'
+    - 'node_modules/cluster-key-slot/**'
+    - 'node_modules/@redis/**'
+    - 'node_modules/denque/**'
+    - 'node_modules/lodash/**'
     - '!tests/**'
     - '!cdk/**'
     - '!scripts/**'
@@ -79,8 +89,11 @@ package:
     - '!coverage/**'
     - '!*.ts'
     - '!tsconfig*.json'
+    - '!*.md'
+    - '!docker-compose.yml'
+    - '!.eslintrc.json'
+    - '!.prettierrc.json'
     - '.build/**'
-    - 'node_modules/**'
 
 functions:
   # ── Products ──────────────────────────────────────────────────────────────
