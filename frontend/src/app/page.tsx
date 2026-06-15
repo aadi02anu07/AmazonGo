@@ -211,8 +211,8 @@ export default function Home() {
                 <ProductCardSkeleton />
               </div>
             ))
-          ) : (trendingRes?.data as any[])?.map((product: any) => (
-            <div key={product.id} className="w-[200px] flex-shrink-0 snap-start">
+          ) : (trendingRes?.data?.products || trendingRes?.data as any[])?.map((product: any) => (
+            <div key={product.productId || product.id} className="w-[200px] flex-shrink-0 snap-start">
               <ProductCard product={product} />
             </div>
           ))}

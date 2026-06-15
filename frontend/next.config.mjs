@@ -16,6 +16,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'cdn.snap.dev',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.openfoodfacts.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+      },
     ],
   },
 };

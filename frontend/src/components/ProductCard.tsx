@@ -1,51 +1,84 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCartStore } from '@/store/useCartStore';
 import { formatPrice } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 
+// Emoji fallbacks by category
+const CATEGORY_EMOJI: Record<string, string> = {
+  grocery: '🛒',
+  medicine: '💊',
+  snacks: '🍿',
+  household: '🏠',
+  'personal-care': '🧴',
+  beverages: '🥤',
+  dairy: '🥛',
+  default: '🛍️',
+};
+
 interface ProductCardProps {
   product: {
-    id: string;
+    id?: string;
+    productId?: string;
     name: string;
     price: number;
-    mrp: number;
-    image: string;
-    isAvailable: boolean;
+    mrp?: number;
+    image?: string;
+    imageUrl?: string;
+    imageUrls?: string[];
+    isAvailable?: boolean;
+    category?: string;
+    subCategory?: string;
   };
 }
 
 export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
+  const [imgError, setImgError] = useState(false);
+
+  // Normalize field names — API returns productId/imageUrl, mock uses id/image
+  const productId = product.id || product.productId || '';
+  const imageUrl = product.image || product.imageUrl || (product.imageUrls?.[0]) || '';
+  const isAvailable = product.isAvailable !== false;
+  const emoji = CATEGORY_EMOJI[product.subCategory || ''] || CATEGORY_EMOJI[product.category || ''] || CATEGORY_EMOJI.default;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!product.isAvailable) return;
+    if (!isAvailable) return;
     addItem({
-      id: product.id,
+      id: productId,
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: imageUrl,
     });
   };
 
   return (
-    <Link href={`/products/${product.id}`} className="group relative flex flex-col rounded-xl bg-card p-3 transition-transform hover:scale-[1.02] hover:shadow-md h-full">
+    <Link href={`/products/${productId}`} className="group relative flex flex-col rounded-xl bg-card p-3 transition-transform hover:scale-[1.02] hover:shadow-md h-full">
       <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-white mb-3">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          className="object-contain p-2"
-        />
-        {!product.isAvailable && (
+        {imageUrl && !imgError ? (
+          <Image
+            src={imageUrl}
+            alt={product.name}
+            fill
+            className="object-contain p-2"
+            unoptimized
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="w-full h-full bg-amber-50 flex items-center justify-center">
+            <span className="text-5xl" role="img" aria-label={product.name}>{emoji}</span>
+          </div>
+        )}
+        {!isAvailable && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <span className="text-white font-bold bg-red-600 px-2 py-1 rounded text-xs uppercase">Out of Stock</span>
           </div>
         )}
-        {product.isAvailable && (
+        {isAvailable && (
           <div className="absolute top-2 left-2 bg-green-100 text-green-800 text-[10px] font-bold px-1.5 py-0.5 rounded">
             10 MINS
           </div>
@@ -58,13 +91,13 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="flex items-end justify-between mt-auto">
           <div className="flex flex-col">
             <span className="text-sm font-bold text-foreground">{formatPrice(product.price)}</span>
-            {product.mrp > product.price && (
+            {product.mrp && product.mrp > product.price && (
               <span className="text-xs text-subtext line-through">{formatPrice(product.mrp)}</span>
             )}
           </div>
           <button
             onClick={handleAddToCart}
-            disabled={!product.isAvailable}
+            disabled={!isAvailable}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-cta hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             aria-label="Add to cart"
           >

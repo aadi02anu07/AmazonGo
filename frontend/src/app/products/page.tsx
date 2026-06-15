@@ -30,9 +30,14 @@ function ProductsContent() {
   const { data: productsRes, isLoading } = useQuery({
     queryKey: ['products', q, category, pincode],
     queryFn: async () => {
-      const endpoint = (!q && !category) 
-        ? `/v1/products/trending?pincode=${pincode}`
-        : `/v1/products/search?q=${encodeURIComponent(q)}&category=${encodeURIComponent(category)}&pincode=${pincode}`;
+      let endpoint: string;
+      if (q) {
+        // Search requires a query term
+        endpoint = `/v1/products/search?q=${encodeURIComponent(q)}&pincode=${pincode}${category ? `&category=${encodeURIComponent(category)}` : ''}`;
+      } else {
+        // No query — use trending (category filter applied client-side)
+        endpoint = `/v1/products/trending?pincode=${pincode}`;
+      }
       const res = await apiClient.get(endpoint);
       return res.data;
     },
@@ -55,8 +60,14 @@ function ProductsContent() {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let displayProducts: any[] = productsRes?.data?.products || productsRes?.data || [];
+  let displayProducts: any[] = productsRes?.data?.products || productsRes?.data?.results || productsRes?.data || [];
   
+  // Apply category filter client-side when browsing by category without search
+  if (category && !q) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    displayProducts = displayProducts.filter((p: any) => p.category === category);
+  }
+
   if (inStockOnly) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     displayProducts = displayProducts.filter((p: any) => p.isAvailable);
