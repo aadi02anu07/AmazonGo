@@ -1,11 +1,12 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import Link from 'next/link';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setToken } = useAuthStore();
@@ -20,9 +21,6 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     
-    // Local dev: use a pre-built JWT with sub = test_user_regular (35 orders, tier 3)
-    // This JWT has payload: { "sub": "test_user_regular" }
-    // Serverless Offline doesn't verify the signature — it just parses the sub claim
     const localDevToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0X3VzZXJfcmVndWxhciIsImVtYWlsIjoidGVzdF9yZWd1bGFyQHNuYXAuZGV2IiwiaWF0IjoxNzA0MDY3MjAwfQ.fake_signature';
     
     setTimeout(() => {
@@ -74,12 +72,20 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-8 text-center text-sm text-subtext">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/signup" className="font-bold text-cta hover:text-primary transition-colors">
             Sign Up
           </Link>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-20 text-center animate-pulse">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -8,7 +9,7 @@ import { usePincodeStore } from '@/store/usePincodeStore';
 import { ProductCard, ProductCardSkeleton } from '@/components/ProductCard';
 import { Filter, Search as SearchIcon } from 'lucide-react';
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { pincode } = usePincodeStore();
@@ -21,7 +22,6 @@ export default function ProductsPage() {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState('relevance');
 
-  // Sync state with URL params on load
   useEffect(() => {
     setQ(searchParams.get('q') || '');
     setCategory(searchParams.get('category') || '');
@@ -54,16 +54,20 @@ export default function ProductsPage() {
     router.push(`/products?${params.toString()}`);
   };
 
-  let displayProducts = productsRes?.data || [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let displayProducts: any[] = productsRes?.data?.products || productsRes?.data || [];
   
   if (inStockOnly) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     displayProducts = displayProducts.filter((p: any) => p.isAvailable);
   }
 
   if (sortBy === 'price-low') {
-    displayProducts = [...displayProducts].sort((a, b) => a.price - b.price);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    displayProducts = [...displayProducts].sort((a: any, b: any) => a.price - b.price);
   } else if (sortBy === 'price-high') {
-    displayProducts = [...displayProducts].sort((a, b) => b.price - a.price);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    displayProducts = [...displayProducts].sort((a: any, b: any) => b.price - a.price);
   }
 
   const categories = ['grocery', 'medicine', 'snacks', 'household', 'personal-care'];
@@ -158,7 +162,7 @@ export default function ProductsPage() {
         <main className="flex-1">
           <div className="mb-6 flex justify-between items-end">
             <h1 className="font-serif text-3xl font-bold text-cta">
-              {q ? `Search results for "${q}"` : category ? `${category.replace('-', ' ')}` : 'Trending Products'}
+              {q ? `Search results for &quot;${q}&quot;` : category ? `${category.replace('-', ' ')}` : 'Trending Products'}
             </h1>
             <span className="text-sm font-medium text-subtext">{displayProducts.length} items</span>
           </div>
@@ -171,8 +175,9 @@ export default function ProductsPage() {
             </div>
           ) : displayProducts.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {displayProducts.map((product: any) => (
-                <div key={product.id}><ProductCard product={product} /></div>
+                <div key={product.productId || product.id}><ProductCard product={product} /></div>
               ))}
             </div>
           ) : (
@@ -193,5 +198,21 @@ export default function ProductsPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 lg:px-8 py-8">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          {Array(8).fill(0).map((_, i) => (
+            <div key={i}><ProductCardSkeleton /></div>
+          ))}
+        </div>
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   );
 }

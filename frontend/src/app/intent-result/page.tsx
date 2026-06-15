@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
@@ -9,7 +10,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { useCartStore } from '@/store/useCartStore';
 import { Search, ShoppingBag, ArrowRight } from 'lucide-react';
 
-export default function IntentResultPage() {
+function IntentResultContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { addItem } = useCartStore();
@@ -45,9 +46,9 @@ export default function IntentResultPage() {
         <div className="w-24 h-24 bg-card rounded-full flex items-center justify-center mx-auto mb-6">
           <Search size={40} className="text-cta" />
         </div>
-        <h1 className="font-serif text-3xl font-bold text-cta mb-4">We didn't quite get that</h1>
+        <h1 className="font-serif text-3xl font-bold text-cta mb-4">We didn&apos;t quite get that</h1>
         <p className="text-subtext mb-8 text-lg">
-          We couldn't find a confident match for your search. {suggestion && <span className="font-bold text-cta block mt-2">Suggestion: {suggestion}</span>}
+          We couldn&apos;t find a confident match for your search. {suggestion && <span className="font-bold text-cta block mt-2">Suggestion: {suggestion}</span>}
         </p>
         <div className="flex justify-center gap-4">
           <Link href="/" className="px-6 py-3 bg-cta text-white rounded-full font-bold hover:bg-opacity-90">
@@ -69,7 +70,7 @@ export default function IntentResultPage() {
 
   return (
     <div className="container mx-auto px-4 lg:px-8 py-10">
-      <h1 className="font-serif text-3xl font-bold text-cta mb-8">We found what you're looking for!</h1>
+      <h1 className="font-serif text-3xl font-bold text-cta mb-8">We found what you&apos;re looking for!</h1>
 
       {product && (
         <div className="bg-card rounded-3xl p-6 md:p-10 flex flex-col md:flex-row gap-8 items-center border border-primary/20 relative overflow-hidden">
@@ -94,7 +95,7 @@ export default function IntentResultPage() {
                 }}
                 className="flex-1 bg-cta text-white py-4 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-opacity-90 transition-colors"
               >
-                <ShoppingBag size={20} /> Add & Checkout
+                <ShoppingBag size={20} /> Add &amp; Checkout
               </button>
               <Link 
                 href={`/products/${product.id}`}
@@ -111,6 +112,7 @@ export default function IntentResultPage() {
         <div className="mt-16">
           <h2 className="font-serif text-2xl font-bold text-cta mb-6">Also consider</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {altsRes.data.map((p: any) => (
               <ProductCard key={p.id} product={p} />
             ))}
@@ -118,5 +120,13 @@ export default function IntentResultPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function IntentResultPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-20 text-center animate-pulse">Loading...</div>}>
+      <IntentResultContent />
+    </Suspense>
   );
 }
