@@ -79,32 +79,46 @@ export default function Home() {
 
   const handleVoiceSearch = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Speech recognition is not supported in this browser.');
+      alert('Voice search requires Chrome browser. Please use the text search instead.');
       return;
     }
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-IN';
     recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
     
     recognition.onstart = () => setIsListening(true);
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       setIntentQuery(transcript);
-      // Wait slightly then submit
       setTimeout(() => {
-        // Mock submitting since state might not update immediately for the direct call
-        apiClient.post('/v1/intent/text', { transcript, pincode }).then(res => {
+        apiClient.post('/v1/intent/text', { transcript, pincode: pincode || '110024' }).then(res => {
           const { confidence, productId, alternatives, suggestion } = res.data.data;
           if (confidence >= 0.75 && productId) router.push(`/products/${productId}`);
           else if (confidence >= 0.50) router.push(`/intent-result?productId=${productId}&alternatives=${alternatives?.join(',') || ''}`);
           else router.push(`/intent-result?failed=true&suggestion=${encodeURIComponent(suggestion || '')}`);
+        }).catch(() => {
+          router.push(`/products?q=${encodeURIComponent(transcript)}`);
         });
       }, 100);
     };
-    recognition.onerror = () => setIsListening(false);
+    recognition.onerror = (event: any) => {
+      setIsListening(false);
+      if (event.error === 'not-allowed') {
+        alert('Microphone access denied. Please allow microphone access in your browser settings.');
+      } else if (event.error === 'no-speech') {
+        alert('No speech detected. Please try again.');
+      }
+    };
     recognition.onend = () => setIsListening(false);
-    recognition.start();
+    
+    try {
+      recognition.start();
+    } catch {
+      setIsListening(false);
+      alert('Could not start voice recognition. Please use text search instead.');
+    }
   };
 
   const categories = [

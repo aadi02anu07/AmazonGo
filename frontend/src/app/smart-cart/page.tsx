@@ -1,19 +1,22 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { usePincodeStore } from '@/store/usePincodeStore';
-import { useCartStore } from '@/store/useCartStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { ProductCard } from '@/components/ProductCard';
-import { Sparkles, RefreshCw, ShoppingBag } from 'lucide-react';
+import { Sparkles, RefreshCw, Zap, CheckCircle } from 'lucide-react';
 
 export default function SmartCartPage() {
   const router = useRouter();
   const { pincode } = usePincodeStore();
-  const { addItem, toggleDrawer } = useCartStore();
+  const { token } = useAuthStore();
   const queryClient = useQueryClient();
+  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [orderError, setOrderError] = useState('');
 
   const { data: smartCartRes, isLoading } = useQuery({
     queryKey: ['smart-cart', pincode],
@@ -34,22 +37,31 @@ export default function SmartCartPage() {
     },
   });
 
-  const handleAddAll = () => {
-    if (!smartCartRes?.data?.products) return;
-    
-    smartCartRes.data.products.forEach((product: any) => {
-      if (product.isAvailable) {
-        addItem({
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          quantity: 1,
-        });
-      }
-    });
-    toggleDrawer(true);
-  };
+  const quickOrderMutation = useMutation({
+    mutationFn: async () => {
+      const products = smartCartRes?.data?.products || [];
+      const items = products
+        .filter((p: any) => p.isAvailable !== false)
+        .map((p: any) => ({ productId: p.id || p.productId, quantity: 1 }));
+
+      if (items.length === 0) throw new Error('No available products to order');
+
+      const res = await apiClient.post('/v1/orders', {
+        items,
+        pincode,
+        addressId: 'Smart Cart Quick Order',
+        paymentMethod: 'cod',
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      setOrderSuccess(true);
+      setOrderError('');
+    },
+    onError: (err: any) => {
+      setOrderError(err.message || 'Order failed. Please try again.');
+    },
+  });
 
   if (isLoading) {
     return (
@@ -69,7 +81,6 @@ export default function SmartCartPage() {
     <ProtectedRoute>
       <div className="container mx-auto px-4 lg:px-8 py-10 max-w-5xl pb-20">
         <div className="bg-gradient-to-br from-card to-background border border-primary/20 rounded-3xl p-8 mb-10 shadow-sm relative overflow-hidden">
-          {/* Decorative element */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
 
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -82,7 +93,7 @@ export default function SmartCartPage() {
                 Curated for you
               </h1>
               <p className="text-subtext text-lg max-w-xl">
-                {smartCart?.explanation || 'Based on your previous orders and what\'s popular near you.'}
+                {smartCart?.explanation || "Based on your previous orders and what's popular near you."}
               </p>
             </div>
 
@@ -95,20 +106,34 @@ export default function SmartCartPage() {
                 <RefreshCw size={18} className={refreshMutation.isPending ? 'animate-spin' : ''} /> 
                 Refresh
               </button>
-              <button 
-                onClick={handleAddAll}
-                className="px-6 py-3 bg-cta text-white rounded-full font-bold flex items-center justify-center gap-2 hover:bg-opacity-90 transition-colors shadow-sm"
-              >
-                <ShoppingBag size={18} /> Add All to Cart
-              </button>
+              {orderSuccess ? (
+                <div className="px-6 py-3 bg-green-100 text-green-700 rounded-full font-bold flex items-center gap-2">
+                  <CheckCircle size={18} /> Order Placed!
+                </div>
+              ) : (
+                <button 
+                  onClick={() => quickOrderMutation.mutate()}
+                  disabled={quickOrderMutation.isPending || !pincode}
+                  className="px-6 py-3 bg-cta text-white rounded-full font-bold flex items-center justify-center gap-2 hover:bg-opacity-90 transition-colors shadow-sm disabled:opacity-50"
+                >
+                  <Zap size={18} /> 
+                  {quickOrderMutation.isPending ? 'Placing Order...' : 'Quick Order (COD)'}
+                </button>
+              )}
             </div>
           </div>
+
+          {orderError && (
+            <div className="relative z-10 mt-4 p-3 bg-red-100 text-red-700 rounded-xl text-sm font-medium">
+              {orderError}
+            </div>
+          )}
         </div>
 
         {smartCart?.products?.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {smartCart.products.map((product: any) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id || product.productId} product={product} />
             ))}
           </div>
         ) : (
@@ -117,6 +142,37 @@ export default function SmartCartPage() {
           </div>
         )}
       </div>
+
+      {/* Order Success Modal */}
+      {orderSuccess && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setOrderSuccess(false)}>
+          <div
+            className="bg-white rounded-3xl p-10 max-w-md w-full text-center shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle size={40} className="text-green-600" />
+            </div>
+            <h2 className="font-serif text-3xl font-bold text-cta mb-3">Order Placed!</h2>
+            <p className="text-subtext text-lg mb-2">Your Smart Cart order has been placed successfully.</p>
+            <p className="text-subtext text-sm mb-8">Payment: <span className="font-bold text-cta">Cash on Delivery</span></p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setOrderSuccess(false); router.push('/orders'); }}
+                className="flex-1 py-3 bg-cta text-white rounded-full font-bold hover:bg-opacity-90 transition-colors"
+              >
+                View Orders
+              </button>
+              <button
+                onClick={() => setOrderSuccess(false)}
+                className="flex-1 py-3 border-2 border-cta text-cta rounded-full font-bold hover:bg-card transition-colors"
+              >
+                Continue Shopping
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </ProtectedRoute>
   );
 }

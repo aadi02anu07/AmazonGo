@@ -17,6 +17,11 @@ function LoginContent() {
 
   const redirectUrl = searchParams.get('redirect') || '/';
 
+  const fillTestCredentials = () => {
+    setEmail('test@amazongo.dev');
+    setPassword('test1234');
+  };
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -35,7 +40,7 @@ function LoginContent() {
       <div className="w-full max-w-md bg-white border border-card rounded-3xl p-8 shadow-lg">
         <div className="text-center mb-8">
           <h1 className="font-serif text-3xl font-bold text-cta mb-2">Welcome Back</h1>
-          <p className="text-subtext">Sign in to your Amazon Now Snap account</p>
+          <p className="text-subtext">Sign in to your AmazonGo account</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
@@ -61,6 +66,15 @@ function LoginContent() {
               placeholder="••••••••"
             />
           </div>
+
+          {/* Test credentials button */}
+          <button
+            type="button"
+            onClick={fillTestCredentials}
+            className="w-full py-2.5 border-2 border-dashed border-primary/40 text-primary text-sm font-bold rounded-xl hover:bg-primary/5 transition-colors"
+          >
+            🧪 Use Test Credentials
+          </button>
           
           <button
             type="submit"
