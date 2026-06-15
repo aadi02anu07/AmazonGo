@@ -57,6 +57,9 @@ class ResponseFormatter {
       headers: {
         'Content-Type': 'application/json',
         'X-Request-ID': responseBody.requestId,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Request-ID',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
       },
       body: JSON.stringify(responseBody),
     };
@@ -89,6 +92,9 @@ class ResponseFormatter {
       headers: {
         'Content-Type': 'application/json',
         'X-Request-ID': responseBody.requestId,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Request-ID',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
       },
       body: JSON.stringify(responseBody),
     };
