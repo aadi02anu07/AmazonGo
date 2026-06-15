@@ -1,11 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
 import { useCartStore } from '@/store/useCartStore';
 import { formatPrice } from '@/lib/utils';
-import { Plus } from 'lucide-react';
+import Link from 'next/link';
+import { Plus, Minus } from 'lucide-react';
 
 // Emoji fallbacks by category
 const CATEGORY_EMOJI: Record<string, string> = {
@@ -36,43 +34,47 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const addItem = useCartStore((state) => state.addItem);
-  const [imgError, setImgError] = useState(false);
+  const { items, addItem, updateQty } = useCartStore();
 
-  // Normalize field names — API returns productId/imageUrl, mock uses id/image
   const productId = product.id || product.productId || '';
   const imageUrl = product.image || product.imageUrl || (product.imageUrls?.[0]) || '';
   const isAvailable = product.isAvailable !== false;
   const emoji = CATEGORY_EMOJI[product.subCategory || ''] || CATEGORY_EMOJI[product.category || ''] || CATEGORY_EMOJI.default;
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  // Check if this product is already in cart
+  const cartItem = items.find((i) => i.id === productId);
+  const cartQty = cartItem?.quantity || 0;
+
+  const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!isAvailable) return;
-    addItem({
-      id: productId,
-      name: product.name,
-      price: product.price,
-      image: imageUrl,
-    });
+    if (cartQty === 0) {
+      addItem({ id: productId, name: product.name, price: product.price, image: imageUrl });
+    } else {
+      updateQty(productId, cartQty + 1);
+    }
+  };
+
+  const handleRemove = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (cartQty > 0) updateQty(productId, cartQty - 1);
   };
 
   return (
     <Link href={`/products/${productId}`} className="group relative flex flex-col rounded-xl bg-card p-3 transition-transform hover:scale-[1.02] hover:shadow-md h-full">
       <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-white mb-3">
-        {imageUrl && !imgError ? (
-          <Image
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={imageUrl}
             alt={product.name}
-            fill
-            className="object-contain p-2"
-            unoptimized
-            onError={() => setImgError(true)}
+            className="w-full h-full object-contain p-2"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
           />
-        ) : (
-          <div className="w-full h-full bg-amber-50 flex items-center justify-center">
-            <span className="text-5xl" role="img" aria-label={product.name}>{emoji}</span>
-          </div>
-        )}
+        ) : null}
+        <div className={`w-full h-full bg-amber-50 flex items-center justify-center ${imageUrl ? 'hidden' : ''}`}>
+          <span className="text-5xl" role="img" aria-label={product.name}>{emoji}</span>
+        </div>
         {!isAvailable && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <span className="text-white font-bold bg-red-600 px-2 py-1 rounded text-xs uppercase">Out of Stock</span>
@@ -95,14 +97,39 @@ export function ProductCard({ product }: ProductCardProps) {
               <span className="text-xs text-subtext line-through">{formatPrice(product.mrp)}</span>
             )}
           </div>
-          <button
-            onClick={handleAddToCart}
-            disabled={!isAvailable}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-cta hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            aria-label="Add to cart"
-          >
-            <Plus size={18} strokeWidth={2.5} />
-          </button>
+
+          {/* Cart quantity control */}
+          {cartQty > 0 ? (
+            <div
+              className="flex items-center gap-1 bg-cta rounded-full px-1 py-0.5"
+              onClick={(e) => e.preventDefault()}
+            >
+              <button
+                onClick={handleRemove}
+                className="w-6 h-6 flex items-center justify-center text-white hover:bg-white/20 rounded-full transition-colors"
+                aria-label="Remove one"
+              >
+                <Minus size={12} strokeWidth={3} />
+              </button>
+              <span className="text-white font-bold text-sm w-5 text-center">{cartQty}</span>
+              <button
+                onClick={handleAdd}
+                className="w-6 h-6 flex items-center justify-center text-white hover:bg-white/20 rounded-full transition-colors"
+                aria-label="Add one"
+              >
+                <Plus size={12} strokeWidth={3} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleAdd}
+              disabled={!isAvailable}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-cta hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              aria-label="Add to cart"
+            >
+              <Plus size={18} strokeWidth={2.5} />
+            </button>
+          )}
         </div>
       </div>
     </Link>

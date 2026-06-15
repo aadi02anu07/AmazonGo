@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import Image from 'next/image';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { useCartStore } from '@/store/useCartStore';
@@ -34,7 +33,8 @@ export default function ProductDetailPage() {
       const res = await apiClient.get(`/v1/inventory/${pincode}/${productId}`);
       return res.data;
     },
-    enabled: !!pincode,
+    enabled: !!pincode && !!productId,
+    retry: false, // don't retry on 422
   });
 
   const { data: etaData } = useQuery({
@@ -49,8 +49,12 @@ export default function ProductDetailPage() {
   const { data: relatedRes } = useQuery({
     queryKey: ['related', productRes?.data?.category, pincode],
     queryFn: async () => {
-      const res = await apiClient.get(`/v1/products/search?category=${productRes.data.category}&pincode=${pincode}`);
-      return res.data;
+      // Use trending endpoint and filter by category client-side
+      // (search requires a query term, trending doesn't)
+      const res = await apiClient.get(`/v1/products/trending?pincode=${pincode || '110024'}`);
+      const allProducts = res.data?.data || [];
+      const filtered = allProducts.filter((p: any) => p.category === productRes?.data?.category && p.id !== productId);
+      return { data: { data: filtered } };
     },
     enabled: !!productRes?.data?.category,
   });
@@ -88,8 +92,10 @@ export default function ProductDetailPage() {
   }
 
   const product = productRes.data;
-  // Use real inventory if available, fallback to product object
-  const isAvailable = inventoryRes?.data ? inventoryRes.data.isAvailable : product.isAvailable;
+  // Use inventory availability if explicitly returned, fallback to product's own flag
+  const isAvailable = (inventoryRes?.data?.isAvailable !== undefined && inventoryRes?.data?.isAvailable !== null)
+    ? inventoryRes.data.isAvailable
+    : (product.isAvailable !== false);
 
   const handleAddToCart = () => {
     if (!isAvailable) return;
@@ -118,7 +124,8 @@ export default function ProductDetailPage() {
         {/* Left: Image Gallery (Simple single image for now) */}
         <div className="w-full lg:w-1/2">
           <div className="relative aspect-square bg-card rounded-3xl overflow-hidden border border-primary/10">
-            <Image src={product.image} alt={product.name} fill className="object-contain p-8" priority />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={product.image || product.imageUrls?.[0] || 'https://placehold.co/400x400/F5F5DC/333?text=Product'} alt={product.name} className="w-full h-full object-contain p-8" onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/400x400/F5F5DC/333?text=Product'; }} />
             {!isAvailable && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm">
                 <span className="text-white font-bold bg-red-600 px-4 py-2 rounded-lg tracking-widest uppercase">Out of Stock</span>

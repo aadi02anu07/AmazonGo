@@ -10,7 +10,8 @@ import { Search, Mic, ShoppingBag, MapPin, User, Menu } from 'lucide-react';
 
 export function Navbar() {
   const router = useRouter();
-  const { totalCount, toggleDrawer } = useCartStore();
+  const { items, toggleDrawer } = useCartStore();
+  const totalCount = items.reduce((acc, item) => acc + item.quantity, 0);
   const { isLoggedIn } = useAuthStore();
   const { pincode, setPincode } = usePincodeStore();
   
@@ -89,7 +90,7 @@ export function Navbar() {
               <Menu size={24} />
             </button>
             <Link href="/" className="font-serif text-2xl lg:text-3xl font-bold text-cta">
-              Now<span className="text-primary">Snap</span>
+              Amazon<span className="text-primary">Go</span>
             </Link>
           </div>
 

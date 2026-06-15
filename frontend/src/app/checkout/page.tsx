@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { useCartStore } from '@/store/useCartStore';
 import { usePincodeStore } from '@/store/usePincodeStore';
 import { apiClient } from '@/lib/api';
@@ -12,10 +11,14 @@ import { MapPin, ChevronRight, AlertCircle, ShoppingBag } from 'lucide-react';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, totalPrice, clearCart } = useCartStore();
+  const { items, clearCart } = useCartStore();
   const { pincode } = usePincodeStore();
   
+  // Compute total from items directly to avoid Zustand getter hydration issue
+  const totalPrice = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  
   const [address, setAddress] = useState('Flat 402, Sunshine Apartments, 5th Cross Road');
+  const [paymentMethod, setPaymentMethod] = useState<'amazon_pay' | 'cod'>('amazon_pay');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -39,7 +42,7 @@ export default function CheckoutPage() {
         items: items.map(i => ({ productId: i.id, quantity: i.quantity })),
         pincode,
         addressId: address,
-        paymentMethod: 'amazon_pay'
+        paymentMethod
       });
       
       const newOrder = res.data.data;
@@ -108,7 +111,8 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <li key={item.id} className="flex gap-4 pb-4 border-b border-card last:border-0 last:pb-0">
                     <div className="w-16 h-16 bg-card rounded-lg relative flex-shrink-0 border border-primary/10">
-                      <Image src={item.image} alt={item.name} fill className="object-contain p-1" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={item.image || 'https://placehold.co/64x64/F5F5DC/333?text=Item'} alt={item.name} className="w-full h-full object-contain p-1" onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/64x64/F5F5DC/333?text=Item'; }} />
                     </div>
                     <div className="flex flex-col flex-grow justify-between">
                       <span className="font-bold text-cta text-sm">{item.name}</span>
@@ -128,6 +132,37 @@ export default function CheckoutPage() {
             <div className="bg-card rounded-3xl p-6 md:p-8 sticky top-24 border border-primary/20">
               <h2 className="font-serif text-2xl font-bold text-cta mb-6">Payment</h2>
               
+              {/* Payment Method Selection */}
+              <div className="space-y-3 mb-6">
+                <label
+                  className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${paymentMethod === 'amazon_pay' ? 'border-primary bg-primary/5' : 'border-card bg-white'}`}
+                  onClick={() => setPaymentMethod('amazon_pay')}
+                >
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${paymentMethod === 'amazon_pay' ? 'border-primary' : 'border-subtext'}`}>
+                    {paymentMethod === 'amazon_pay' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                  </div>
+                  <div>
+                    <div className="font-bold text-cta text-sm">Amazon Pay</div>
+                    <div className="text-xs text-subtext">Fast & secure digital payment</div>
+                  </div>
+                  <span className="ml-auto text-xl">💳</span>
+                </label>
+
+                <label
+                  className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-primary bg-primary/5' : 'border-card bg-white'}`}
+                  onClick={() => setPaymentMethod('cod')}
+                >
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${paymentMethod === 'cod' ? 'border-primary' : 'border-subtext'}`}>
+                    {paymentMethod === 'cod' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                  </div>
+                  <div>
+                    <div className="font-bold text-cta text-sm">Cash on Delivery</div>
+                    <div className="text-xs text-subtext">Pay when your order arrives</div>
+                  </div>
+                  <span className="ml-auto text-xl">💵</span>
+                </label>
+              </div>
+
               <div className="space-y-4 mb-6 text-subtext">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
@@ -151,6 +186,8 @@ export default function CheckoutPage() {
               >
                 {isSubmitting ? (
                   <span className="animate-pulse">Processing...</span>
+                ) : paymentMethod === 'cod' ? (
+                  <>Place Order (COD) <ChevronRight size={20} /></>
                 ) : (
                   <>Pay with Amazon Pay <ChevronRight size={20} /></>
                 )}

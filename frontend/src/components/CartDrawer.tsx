@@ -4,15 +4,17 @@ import { useCartStore } from '@/store/useCartStore';
 import { formatPrice } from '@/lib/utils';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export function CartDrawer() {
-  const { items, isDrawerOpen, toggleDrawer, updateQty, removeItem, totalPrice } = useCartStore();
+  const { items, isDrawerOpen, toggleDrawer, updateQty, removeItem } = useCartStore();
   const { isLoggedIn } = useAuthStore();
   const router = useRouter();
+
+  // Compute total from items directly — Zustand getter not reactive after hydration
+  const totalPrice = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   const handleCheckout = () => {
     toggleDrawer(false);
@@ -78,7 +80,8 @@ export function CartDrawer() {
                   {items.map((item) => (
                     <li key={item.id} className="flex gap-4 p-3 bg-white rounded-xl shadow-sm border border-card">
                       <div className="relative w-20 h-20 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
-                        <Image src={item.image} alt={item.name} fill className="object-contain p-1" />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.image || 'https://placehold.co/80x80/F5F5DC/333?text=Item'} alt={item.name} className="w-full h-full object-contain p-1" onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/80x80/F5F5DC/333?text=Item'; }} />
                       </div>
                       <div className="flex flex-col flex-grow justify-between">
                         <div className="flex justify-between items-start">

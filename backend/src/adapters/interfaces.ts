@@ -20,8 +20,11 @@ export interface SearchResult {
   category: string;
   subCategory: string;
   price: number;
+  mrp?: number;
   imageUrl: string;
+  imageUrls?: string[];
   tags: string[];
+  isAvailable?: boolean;
   score: number;
 }
 

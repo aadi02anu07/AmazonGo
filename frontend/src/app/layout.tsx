@@ -16,8 +16,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Amazon Now Snap",
-  description: "10-minute quick-commerce grocery delivery app",
+  title: "AmazonGo",
+  description: "10-minute quick-commerce grocery delivery",
 };
 
 export default function RootLayout({

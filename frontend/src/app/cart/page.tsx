@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -10,8 +9,10 @@ import { ShoppingBag, Minus, Plus, X, ArrowRight } from 'lucide-react';
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, updateQty, removeItem, totalPrice } = useCartStore();
+  const { items, updateQty, removeItem } = useCartStore();
   const { isLoggedIn } = useAuthStore();
+
+  const totalPrice = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   const handleCheckout = () => {
     if (isLoggedIn) router.push('/checkout');
@@ -50,7 +51,8 @@ export default function CartPage() {
               </button>
               
               <div className="w-24 h-24 bg-card rounded-xl relative overflow-hidden flex-shrink-0">
-                <Image src={item.image} alt={item.name} fill className="object-contain p-2" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={item.image || 'https://placehold.co/96x96/F5F5DC/333?text=Item'} alt={item.name} className="w-full h-full object-contain p-2" onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/96x96/F5F5DC/333?text=Item'; }} />
               </div>
               
               <div className="flex flex-col justify-between flex-grow">

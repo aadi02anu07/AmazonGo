@@ -2,7 +2,6 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { apiClient } from '@/lib/api';
@@ -105,7 +104,8 @@ export default function OrderConfirmationPage() {
                 {order.items.map((item: any, idx: number) => (
                   <li key={idx} className="flex gap-4 pb-4 border-b border-card last:border-0 last:pb-0">
                     <div className="w-16 h-16 bg-card rounded-lg relative flex-shrink-0 border border-primary/10">
-                      <Image src={item.image || 'https://via.placeholder.com/150'} alt={item.name} fill className="object-contain p-1" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={item.image || 'https://placehold.co/64x64/F5F5DC/333?text=Item'} alt={item.name} className="w-full h-full object-contain p-1" onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/64x64/F5F5DC/333?text=Item'; }} />
                     </div>
                     <div className="flex flex-col flex-grow justify-between">
                       <span className="font-bold text-cta text-sm">{item.name}</span>

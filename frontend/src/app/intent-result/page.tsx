@@ -77,7 +77,8 @@ function IntentResultContent() {
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
           
           <div className="w-full md:w-1/3 aspect-square relative bg-white rounded-2xl shadow-sm z-10">
-            <Image src={product.image} alt={product.name} fill className="object-contain p-4" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={product.image || 'https://placehold.co/400x400/F5F5DC/333?text=Product'} alt={product.name} className="w-full h-full object-contain p-4" onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/400x400/F5F5DC/333?text=Product'; }} />
           </div>
           
           <div className="w-full md:w-2/3 z-10">

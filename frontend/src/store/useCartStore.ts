@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 export interface CartItem {
   id: string;
   name: string;
-  price: number; // in rupees (backend prices are normalized from paise)
+  price: number; // in paise (e.g. 2000 = ₹20)
   image: string;
   quantity: number;
 }
@@ -17,8 +17,8 @@ interface CartState {
   updateQty: (id: string, quantity: number) => void;
   clearCart: () => void;
   toggleDrawer: (open?: boolean) => void;
-  get totalCount(): number;
-  get totalPrice(): number;
+  totalCount: number;
+  totalPrice: number;
 }
 
 export const useCartStore = create<CartState>()(
@@ -34,12 +34,10 @@ export const useCartStore = create<CartState>()(
               items: state.items.map((i) =>
                 i.id === newItem.id ? { ...i, quantity: i.quantity + (newItem.quantity || 1) } : i
               ),
-              isDrawerOpen: true,
             };
           }
           return {
             items: [...state.items, { ...newItem, quantity: newItem.quantity || 1 }],
-            isDrawerOpen: true,
           };
         });
       },
@@ -70,7 +68,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'snap_cart',
-      partialize: (state) => ({ items: state.items }), // Only persist items, not drawer state
+      partialize: (state) => ({ items: state.items }),
     }
   )
 );

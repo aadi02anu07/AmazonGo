@@ -151,47 +151,57 @@ export class DynamoSearchAdapter implements SearchAdapter {
           TableName: this.searchIndexTable,
           IndexName: 'CategoryIndex',
           KeyConditionExpression: 'category = :category',
-          FilterExpression: 'isAvailable = :true',
           ExpressionAttributeValues: {
             ':category': category,
-            ':true': true,
           },
         });
 
         const response = await this.client.send(command);
         items = response.Items || [];
       } else {
-        // Full table scan with filter
+        // Full table scan
         const command = new ScanCommand({
           TableName: this.searchIndexTable,
-          FilterExpression: 'isAvailable = :true',
-          ExpressionAttributeValues: {
-            ':true': true,
-          },
         });
 
         const response = await this.client.send(command);
         items = response.Items || [];
       }
 
-      // Score and rank results
-      const scoredResults = items
-        .map((item) => ({
-          productId: item.productId as string,
-          searchTokens: item.searchTokens as string,
-          category: item.category as string,
-          brand: item.brand as string,
-          score: this.scoreProduct(searchTokens, item.searchTokens as string),
-        }))
-        .filter((item) => item.score > 0) // Only return matches
-        .sort((a, b) => b.score - a.score) // Sort by score descending
-        .slice(0, limit); // Limit results
+      // Score and rank results — each item has a single 'token' attribute
+      // Group by productId and count how many of the search tokens match
+      const productScoreMap = new Map<string, { score: number; category: string; brand: string }>();
+      
+      for (const item of items) {
+        const productId = item.productId as string;
+        const itemToken = (item.token as string || '').toLowerCase();
+        
+        // Check if any search token matches this item's token
+        const matches = searchTokens.filter(st => itemToken.includes(st) || st.includes(itemToken)).length;
+        if (matches > 0) {
+          const existing = productScoreMap.get(productId);
+          if (existing) {
+            existing.score += matches;
+          } else {
+            productScoreMap.set(productId, {
+              score: matches,
+              category: item.category as string,
+              brand: item.brand as string,
+            });
+          }
+        }
+      }
+
+      const scoredResults = Array.from(productScoreMap.entries())
+        .map(([productId, data]) => ({ productId, ...data }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
 
       // Fetch full product details from SnapProducts table
       const productIds = scoredResults.map((r) => r.productId);
       const productDetails = await this.fetchProductDetails(productIds);
 
-      const results: SearchResult[] = scoredResults
+      const results: SearchResult[] = (scoredResults
         .map((scoredItem) => {
           const product = productDetails.get(scoredItem.productId);
           if (!product) {
@@ -199,18 +209,21 @@ export class DynamoSearchAdapter implements SearchAdapter {
           }
 
           return {
-            productId: product.productId,
-            name: product.name,
-            brand: product.brand,
-            category: product.category,
-            subCategory: product.subCategory,
-            price: product.price,
-            imageUrl: product.imageUrls?.[0] || '',
-            tags: product.tags || [],
+            productId: product.productId as string,
+            name: product.name as string,
+            brand: product.brand as string,
+            category: product.category as string,
+            subCategory: product.subCategory as string,
+            price: product.price as number,
+            mrp: product.mrp as number | undefined,
+            imageUrl: (product.imageUrls?.[0] || '') as string,
+            imageUrls: (product.imageUrls || []) as string[],
+            tags: (product.tags || []) as string[],
+            isAvailable: product.isAvailable !== false,
             score: scoredItem.score,
-          };
+          } as SearchResult;
         })
-        .filter((item): item is SearchResult => item !== null);
+        .filter(Boolean)) as SearchResult[];
 
       const duration = Date.now() - startTime;
 
@@ -264,9 +277,11 @@ export class DynamoSearchAdapter implements SearchAdapter {
       const items = response.Items || [];
 
       const productIds = items.map((item) => item.productId as string);
-      const productDetails = await this.fetchProductDetails(productIds);
+      // Deduplicate product IDs — SnapSearchIndex can have multiple tokens per product
+      const uniqueProductIds = [...new Set(productIds)];
+      const productDetails = await this.fetchProductDetails(uniqueProductIds);
 
-      const results: SearchResult[] = productIds
+      const results: SearchResult[] = (uniqueProductIds
         .map((productId, index) => {
           const product = productDetails.get(productId);
           if (!product) {
@@ -274,18 +289,21 @@ export class DynamoSearchAdapter implements SearchAdapter {
           }
 
           return {
-            productId: product.productId,
-            name: product.name,
-            brand: product.brand,
-            category: product.category,
-            subCategory: product.subCategory,
-            price: product.price,
-            imageUrl: product.imageUrls?.[0] || '',
-            tags: product.tags || [],
-            score: limit - index, // Higher score for earlier items
-          };
+            productId: product.productId as string,
+            name: product.name as string,
+            brand: product.brand as string,
+            category: product.category as string,
+            subCategory: product.subCategory as string,
+            price: product.price as number,
+            mrp: product.mrp as number | undefined,
+            imageUrl: (product.imageUrls?.[0] || '') as string,
+            imageUrls: (product.imageUrls || []) as string[],
+            tags: (product.tags || []) as string[],
+            isAvailable: product.isAvailable !== false,
+            score: limit - index,
+          } as SearchResult;
         })
-        .filter((item): item is SearchResult => item !== null);
+        .filter(Boolean)) as SearchResult[];
 
       return results;
     } catch (error) {

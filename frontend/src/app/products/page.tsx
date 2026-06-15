@@ -33,10 +33,10 @@ function ProductsContent() {
       let endpoint: string;
       if (q) {
         // Search requires a query term
-        endpoint = `/v1/products/search?q=${encodeURIComponent(q)}&pincode=${pincode}${category ? `&category=${encodeURIComponent(category)}` : ''}`;
+        endpoint = `/v1/products/search?q=${encodeURIComponent(q)}&pincode=${pincode || '110024'}${category ? `&category=${encodeURIComponent(category)}` : ''}`;
       } else {
         // No query — use trending (category filter applied client-side)
-        endpoint = `/v1/products/trending?pincode=${pincode}`;
+        endpoint = `/v1/products/trending?pincode=${pincode || '110024'}`;
       }
       const res = await apiClient.get(endpoint);
       return res.data;

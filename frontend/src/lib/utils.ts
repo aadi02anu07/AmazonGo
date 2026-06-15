@@ -6,5 +6,5 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatPrice(rupees: number) {
-  return `₹${rupees.toFixed(2)}`;
+  return `₹${rupees.toFixed(0)}`;
 }

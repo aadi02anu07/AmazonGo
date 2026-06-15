@@ -30,6 +30,7 @@
     "serverless:offline": "npx tsc --project tsconfig.serverless.json && npx tsc-alias --project tsconfig.serverless.json && npx serverless offline start --stage dev",
     "serverless:offline:build": "npx tsc-alias --project tsconfig.serverless.json && cross-env serverless offline start --stage dev",
     "seed:dev": "ts-node --project scripts/tsconfig.json -r tsconfig-paths/register scripts/seed-dev-data.ts",
+    "images:update": "ts-node --project scripts/tsconfig.json -r tsconfig-paths/register scripts/update-product-images.ts",
     "tables:local": "ts-node --project scripts/tsconfig.json -r tsconfig-paths/register scripts/create-local-tables.ts",
     "prepare": "cd .. && husky",
     "precommit": "lint-staged"
