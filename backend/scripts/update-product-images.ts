@@ -87,6 +87,7 @@ const PRODUCT_IMAGES: Record<string, string> = {
   'prod_odonil_50g':        'https://placehold.co/400x400/E8EAF6/333333?text=Odonil',
 
   // PERSONAL CARE
+  'prod_dove_soap_75':      'https://placehold.co/400x400/ffffff/333333?text=Dove+Soap',
   'prod_dove_soap_75g':     'https://placehold.co/400x400/ffffff/333333?text=Dove+Soap',
   'prod_lux_soap_75g':      'https://placehold.co/400x400/FFF8E1/333333?text=Lux+Soap',
   'prod_head_shoulders_180': 'https://placehold.co/400x400/1565C0/ffffff?text=Head+Shoulders',
@@ -97,6 +98,12 @@ const PRODUCT_IMAGES: Record<string, string> = {
   'prod_whisper_ultra_7':   'https://placehold.co/400x400/E91E63/ffffff?text=Whisper',
   'prod_dettol_soap_75g':   'https://placehold.co/400x400/1B5E20/ffffff?text=Dettol+Soap',
   'prod_vaseline_100ml':    'https://placehold.co/400x400/E3F2FD/333333?text=Vaseline',
+  'prod_colgate_150':       'https://placehold.co/400x400/D32F2F/ffffff?text=Colgate+150g',
+  'prod_pampers_s3_20':     'https://placehold.co/400x400/64B5F6/ffffff?text=Pampers+S3',
+  'prod_parachute_coconut_200': 'https://placehold.co/400x400/E8F5E9/333333?text=Parachute+Oil',
+  'prod_goodnight_mat':     'https://placehold.co/400x400/1A237E/ffffff?text=Good+Knight',
+  'prod_colin_500':         'https://placehold.co/400x400/E3F2FD/333333?text=Colin+500ml',
+  'prod_black_flag':        'https://placehold.co/400x400/212121/ffffff?text=Black+Flag',
 };
 
 async function updateProductImage(productId: string, imageUrl: string, sku: string): Promise<void> {
