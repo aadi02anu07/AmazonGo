@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mic, Search, ChevronRight, Clock } from 'lucide-react';
@@ -56,12 +56,19 @@ export default function Home() {
     }
   };
 
-  const handleIntentSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!intentQuery.trim()) return;
+  const resolveIntent = async (transcript: string) => {
+    if (!isLoggedIn) {
+      router.push(`/login?next=${encodeURIComponent('/')}`);
+      return;
+    }
+    if (!pincode) {
+      // No pincode set — fall back to keyword search
+      router.push(`/products?q=${encodeURIComponent(transcript)}`);
+      return;
+    }
 
     try {
-      const res = await apiClient.post('/v1/intent/text', { transcript: intentQuery, pincode });
+      const res = await apiClient.post('/v1/intent/text', { transcript, pincode });
       const { confidence, productId, alternatives, suggestion } = res.data.data;
 
       if (confidence >= 0.75 && productId) {
@@ -71,10 +78,25 @@ export default function Home() {
       } else {
         router.push(`/intent-result?failed=true&suggestion=${encodeURIComponent(suggestion || '')}`);
       }
-    } catch (error) {
-      console.error('Intent processing failed', error);
-      router.push(`/products?q=${encodeURIComponent(intentQuery)}`);
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 401 || status === 403) {
+        router.push(`/login?next=${encodeURIComponent('/')}`);
+      } else if (status === 422) {
+        // Pincode not serviceable — still try keyword search
+        router.push(`/products?q=${encodeURIComponent(transcript)}`);
+      } else {
+        console.error('Intent processing failed', err);
+        router.push(`/products?q=${encodeURIComponent(transcript)}`);
+      }
     }
+  };
+
+  const handleIntentSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const query = intentQuery.trim();
+    if (!query) return;
+    await resolveIntent(query);
   };
 
   const handleVoiceSearch = () => {
@@ -82,37 +104,34 @@ export default function Home() {
       alert('Voice search requires Chrome browser. Please use the text search instead.');
       return;
     }
+
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-IN';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
-    
+
     recognition.onstart = () => setIsListening(true);
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
+
+    recognition.onresult = async (event: any) => {
+      const transcript: string = event.results[0][0].transcript;
       setIntentQuery(transcript);
-      setTimeout(() => {
-        apiClient.post('/v1/intent/text', { transcript, pincode: pincode || '110024' }).then(res => {
-          const { confidence, productId, alternatives, suggestion } = res.data.data;
-          if (confidence >= 0.75 && productId) router.push(`/products/${productId}`);
-          else if (confidence >= 0.50) router.push(`/intent-result?productId=${productId}&alternatives=${alternatives?.join(',') || ''}`);
-          else router.push(`/intent-result?failed=true&suggestion=${encodeURIComponent(suggestion || '')}`);
-        }).catch(() => {
-          router.push(`/products?q=${encodeURIComponent(transcript)}`);
-        });
-      }, 100);
+      await resolveIntent(transcript);
     };
+
     recognition.onerror = (event: any) => {
       setIsListening(false);
       if (event.error === 'not-allowed') {
         alert('Microphone access denied. Please allow microphone access in your browser settings.');
       } else if (event.error === 'no-speech') {
         alert('No speech detected. Please try again.');
+      } else {
+        console.error('Speech recognition error:', event.error);
       }
     };
+
     recognition.onend = () => setIsListening(false);
-    
+
     try {
       recognition.start();
     } catch {
