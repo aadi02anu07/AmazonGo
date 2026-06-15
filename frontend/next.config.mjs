@@ -1,14 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
   eslint: {
-    // ESLint errors are surfaced during local development; skip during CI build
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // Also ignore TS errors during build to avoid similar CI failures
     ignoreBuildErrors: true,
   },
   images: {
+    unoptimized: true, // required for static export
     remotePatterns: [
       {
         protocol: 'https',
