@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Mic, Search, ChevronRight, Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -36,6 +35,7 @@ export default function Home() {
       const res = await apiClient.get(`/v1/products/trending?pincode=${pincode}`);
       return res.data;
     },
+    enabled: !!pincode,
   });
 
   const { data: smartCartRes, isLoading: smartCartLoading } = useQuery({
@@ -108,14 +108,14 @@ export default function Home() {
   };
 
   const categories = [
-    { name: 'Grocery', path: 'grocery', img: 'https://via.placeholder.com/80/F0E6C8/6B4E1A?text=G' },
-    { name: 'Medicine', path: 'medicine', img: 'https://via.placeholder.com/80/F0E6C8/6B4E1A?text=M' },
-    { name: 'Snacks', path: 'snacks', img: 'https://via.placeholder.com/80/F0E6C8/6B4E1A?text=S' },
-    { name: 'Beverages', path: 'snacks&subCategory=beverages', img: 'https://via.placeholder.com/80/F0E6C8/6B4E1A?text=B' },
-    { name: 'Household', path: 'household', img: 'https://via.placeholder.com/80/F0E6C8/6B4E1A?text=H' },
-    { name: 'Baby Care', path: 'personal-care&subCategory=baby', img: 'https://via.placeholder.com/80/F0E6C8/6B4E1A?text=B' },
-    { name: 'Personal Care', path: 'personal-care', img: 'https://via.placeholder.com/80/F0E6C8/6B4E1A?text=P' },
-    { name: 'Dairy', path: 'grocery&subCategory=dairy', img: 'https://via.placeholder.com/80/F0E6C8/6B4E1A?text=D' },
+    { name: 'Grocery', path: 'grocery', emoji: '🛒' },
+    { name: 'Medicine', path: 'medicine', emoji: '💊' },
+    { name: 'Snacks', path: 'snacks', emoji: '🍿' },
+    { name: 'Beverages', path: 'snacks&subCategory=beverages', emoji: '🥤' },
+    { name: 'Household', path: 'household', emoji: '🏠' },
+    { name: 'Baby Care', path: 'personal-care&subCategory=baby', emoji: '👶' },
+    { name: 'Personal Care', path: 'personal-care', emoji: '🧴' },
+    { name: 'Dairy', path: 'grocery&subCategory=dairy', emoji: '🥛' },
   ];
 
   return (
@@ -235,8 +235,8 @@ export default function Home() {
                 href={`/products?category=${cat.path}`}
                 className="flex flex-col items-center group"
               >
-                <div className="w-16 h-16 md:w-24 md:h-24 bg-background rounded-full p-1 shadow-sm mb-3 group-hover:shadow-md group-hover:scale-105 transition-all relative overflow-hidden border border-primary/20">
-                  <Image src={cat.img} alt={cat.name} fill className="object-cover rounded-full" />
+                <div className="w-16 h-16 md:w-24 md:h-24 bg-background rounded-full shadow-sm mb-3 group-hover:shadow-md group-hover:scale-105 transition-all flex items-center justify-center border border-primary/20">
+                  <span className="text-3xl md:text-4xl" role="img" aria-label={cat.name}>{cat.emoji}</span>
                 </div>
                 <span className="text-xs md:text-sm font-bold text-center text-cta group-hover:text-primary transition-colors">
                   {cat.name}
